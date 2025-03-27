@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'login_screen.dart'; // Import màn hình đăng nhập
 
 class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }

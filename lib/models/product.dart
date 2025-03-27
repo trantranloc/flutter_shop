@@ -1,20 +1,36 @@
-class Product {
-  final double id;
-  final String name;
-  final String description;
-  final double price;
-  final String imageUrl; // Thêm trường này vào
+import 'category.dart';
 
-  Product({required this.id,required this.name, required this.description, required this.price, required this.imageUrl});
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  final List<String> images;
+  final String description;
+  final int stock;
+  final int quantity;
+  final Category category;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.images,
+    required this.description,
+    required this.stock,
+    required this.quantity,
+    required this.category,
+  });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'],
+      id: json['_id'],
       name: json['name'],
+      price: (json['price'] as num).toDouble(),
+      images: List<String>.from(json['images'] ?? []),
       description: json['description'],
-
-      price: json['price'].toDouble(),
-      imageUrl: json['imageUrl'] ?? 'https://via.placeholder.com/150',
+      stock: json['stock'],
+      quantity: json['quantity'],
+      category: Category.fromJson(json['category']),
     );
   }
 }

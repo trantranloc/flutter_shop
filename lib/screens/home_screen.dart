@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../models/product.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -124,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
               child: Image.network(
-                product.imageUrl,
+                product.images.first,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),

@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import '../styles/app_styles.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
