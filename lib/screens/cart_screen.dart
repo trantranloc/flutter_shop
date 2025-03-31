@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../models/cart_item.dart'; // Đảm bảo bạn có model CartItem
+import '../models/cart_item.dart';
+import '../services/cart_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -11,43 +10,43 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  final CartService _cartService = CartService();
   List<CartItem> cartItems = [];
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchCart();
+    _loadCart();
   }
 
-  Future<void> _fetchCart() async {
-    final response = await http.get(Uri.parse('YOUR_API_ENDPOINT/cart'));
-
-    if (response.statusCode == 200) {
+  Future<void> _loadCart() async {
+    try {
+      final items = await _cartService.fetchCart();
       setState(() {
-        cartItems =
-            (json.decode(response.body) as List)
-                .map((data) => CartItem.fromJson(data))
-                .toList();
+        cartItems = items;
         isLoading = false;
       });
-    } else {
+    } catch (e) {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  Future<void> _updateQuantity(String productId, int newQuantity) async {
+    await _cartService.updateQuantity(productId, newQuantity);
+    // setState(() {
+    //   cartItems.firstWhere((item) => item.id == productId).quantity =
+    //       newQuantity;
+    // });
   }
 
   Future<void> _removeFromCart(String productId) async {
-    final response = await http.delete(
-      Uri.parse('YOUR_API_ENDPOINT/cart/$productId'),
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        cartItems.removeWhere((item) => item.id == productId);
-      });
-    }
+    await _cartService.removeFromCart(productId);
+    setState(() {
+      cartItems.removeWhere((item) => item.id == productId);
+    });
   }
 
   double _calculateTotal() {
@@ -88,8 +87,48 @@ class _CartScreenState extends State<CartScreen> {
                               item.name,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text(
-                              'Số lượng: ${item.quantity} | Giá: \$${item.price}',
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Giá: \$${item.price.toStringAsFixed(2)}'),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.remove_circle,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        if (item.quantity > 1) {
+                                          _updateQuantity(
+                                            item.id,
+                                            item.quantity - 1,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    Text(
+                                      '${item.quantity}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.add_circle,
+                                        color: Colors.green,
+                                      ),
+                                      onPressed: () {
+                                        _updateQuantity(
+                                          item.id,
+                                          item.quantity + 1,
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                             trailing: IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
@@ -127,8 +166,12 @@ class _CartScreenState extends State<CartScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
+                        padding: EdgeInsets.symmetric(vertical: 14),
                       ),
-                      child: Text('Thanh toán', style: TextStyle(fontSize: 18)),
+                      child: Text(
+                        'Thanh toán',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
                     ),
                   ),
                 ],

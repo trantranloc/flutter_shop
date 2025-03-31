@@ -15,7 +15,30 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primaryColor: Colors.pink.shade300, // Light pink theme
+        scaffoldBackgroundColor: Colors.pink.shade50, // Soft background
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.pink.shade300,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: Colors.pink.shade700,
+          unselectedItemColor: Colors.grey[500],
+          backgroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.pink.shade300,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 25),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      ),
       home: MainScreen(),
     );
   }
@@ -69,22 +92,22 @@ class _MainScreenState extends State<MainScreen> {
           ),
           child: BottomNavigationBar(
             items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Trang chủ',
-              ),
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
                 icon: Icon(Icons.store),
-                label: 'Sản phẩm',
+                label: 'Products',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.shopping_cart),
-                label: 'Giỏ hàng',
+                label: 'Cart',
               ),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Colors.green[700],
+            selectedItemColor: Colors.pink.shade700,
             unselectedItemColor: Colors.grey[500],
             showUnselectedLabels: true,
             backgroundColor: Colors.white,
