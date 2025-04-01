@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchProducts() async {
-    final response = await http.get(Uri.parse('YOUR_API_ENDPOINT/products'));
+    final response = await http.get(Uri.parse('https://express-lirisflora-api.onrender.com/api/products'));
 
     if (response.statusCode == 200) {
       setState(() {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'login_screen.dart'; // Import màn hình đăng nhập
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Thêm SharedPreferences
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,17 +14,35 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? user;
-  bool isLoading = true; // Trạng thái loading
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchProfile();
+    _checkLoginStatus();
   }
 
+  // Kiểm tra trạng thái đăng nhập
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      // Nếu không có token thì điều hướng đến màn hình đăng nhập
+      context.go('/login');
+    } else {
+      // Nếu có token thì tải thông tin người dùng
+      _fetchProfile();
+    }
+  }
+
+  // Hàm lấy thông tin người dùng
   Future<void> _fetchProfile() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:8080//profile'));
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/profile'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
 
       if (response.statusCode == 200) {
         setState(() {
@@ -31,46 +50,121 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false;
         });
       } else {
-        // Delay điều hướng để tránh lỗi context chưa sẵn sàng
-        Future.delayed(Duration.zero, () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-          );
-        });
+        // Điều hướng đến RegisterScreen nếu không có profile
+        context.go('/register');
       }
     } catch (e) {
-      setState(() => isLoading = false);
       print("Error: $e");
-      Future.delayed(Duration.zero, () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-        );
-      });
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : user == null
-              ? Center(child: Text("Không thể tải thông tin"))
-              : Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Name: ${user!['name']}'),
-                    SizedBox(height: 16),
-                    Text('Email: ${user!['email']}'),
-                  ],
-                ),
-              ),
+      appBar: AppBar(
+        title: Text('Profile', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.pink.shade300, // Light pink theme
+      ),
+      body: Center(
+        child:
+            isLoading
+                ? CircularProgressIndicator(color: Colors.pink.shade300)
+                : user == null
+                ? _buildGuestProfile(context)
+                : _buildUserProfile(),
+      ),
+    );
+  }
+
+  Widget _buildGuestProfile(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundImage: AssetImage('assets/default_user.png'),
+        ),
+        SizedBox(height: 20),
+        Text(
+          "Welcome to our flower shop!",
+          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+        ),
+        SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+            // Điều hướng tới màn hình đăng nhập và sau khi quay lại sẽ refresh profile
+            context.push("/login").then((_) {
+              _fetchProfile();
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.pink.shade300,
+            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Text(
+            "LOGIN",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUserProfile() {
+    return Padding(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkImage(
+              user!['avatarUrl'] ?? 'https://via.placeholder.com/150',
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Name: ${user!['name']}',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Email: ${user!['email']}',
+            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+          ),
+          SizedBox(height: 20),
+          _buildUserOptions(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUserOptions() {
+    return Column(
+      children: [
+        _buildMenuItem(Icons.shopping_cart, "My Cart", '/cart'),
+        _buildMenuItem(Icons.person, "Personal Information", '/profile'),
+        _buildMenuItem(Icons.settings, "Settings", '/settings'),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, String route) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.pink.shade300),
+      title: Text(title, style: TextStyle(fontSize: 16)),
+      onTap: () {
+        context.go(route); // Điều hướng đến route tương ứng
+      },
     );
   }
 }

@@ -9,6 +9,7 @@ class Product {
   final int stock;
   final int quantity;
   final Category category;
+  final double rating;
 
   Product({
     required this.id,
@@ -19,6 +20,7 @@ class Product {
     required this.stock,
     required this.quantity,
     required this.category,
+    required this.rating,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -30,7 +32,8 @@ class Product {
       description: json['description'],
       stock: json['stock'],
       quantity: json['quantity'],
-      category: Category.fromJson(json['category']),
+      category: Category.fromJson(json['category'] ?? {}),
+      rating: (json['rating'] ?? 0).toDouble(),
     );
   }
 }
