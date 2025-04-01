@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Chuyển hướng tới trang chính sau khi đăng nhập thành công
         Future.delayed(Duration(seconds: 1), () {
-          context.go('/home');
+          GoRouter.of(context).go('/');
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

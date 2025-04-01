@@ -192,7 +192,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () {
-                    context.go('/login');
+                    GoRouter.of(context).go('/login');
                   },
                   style: AppStyles.outlinedGreenButton,
                   child: Text("Already an Account ?"),

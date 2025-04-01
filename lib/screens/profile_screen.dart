@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:http/http.dart' as http;
-import 'login_screen.dart';
 import 'dart:convert';
-import 'package:go_router/go_router.dart'; // Import GoRouter
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Thêm SharedPreferences
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -19,13 +19,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchProfile();
+    _checkLoginStatus();
   }
 
+  // Kiểm tra trạng thái đăng nhập
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      // Nếu không có token thì điều hướng đến màn hình đăng nhập
+      context.go('/login');
+    } else {
+      // Nếu có token thì tải thông tin người dùng
+      _fetchProfile();
+    }
+  }
+
+  // Hàm lấy thông tin người dùng
   Future<void> _fetchProfile() async {
     try {
       final response = await http.get(
         Uri.parse('http://localhost:8080/profile'),
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
@@ -41,8 +57,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       print("Error: $e");
     } finally {
       setState(() => isLoading = false);
-      // Điều hướng đến RegisterScreen trong trường hợp lỗi
-      context.go('/register');
     }
   }
 

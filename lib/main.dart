@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop/screens/login_screen.dart';
-import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+
+// Màn hình chính
 import 'screens/home_screen.dart';
 import 'screens/product_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/login_screen.dart'; // Thêm màn hình Login
+import 'screens/register_screen.dart'; // Thêm màn hình Register
 
 void main() {
+  setUrlStrategy(PathUrlStrategy()); 
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.pink.shade300,
-        scaffoldBackgroundColor: Colors.pink.shade50,
+        primaryColor: Colors.pink.shade300, // Light pink theme
+        scaffoldBackgroundColor: Colors.pink.shade50, // Soft background
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.pink.shade300,
           foregroundColor: Colors.white,
@@ -42,34 +46,24 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      routerConfig: _router,
+      routerConfig: _router, // Cấu hình router tại đây
     );
   }
 
+  // Cấu hình GoRouter
   final GoRouter _router = GoRouter(
-    initialLocation: '/home', // Set initial location to home
+    initialLocation: '/', // Đặt màn hình mặc định khi khởi động
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          return const MainScreen();
-        },
-      ),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
-      GoRoute(
-        path: '/products',
-        builder: (context, state) => const ProductScreen(),
-      ),
-      GoRoute(path: '/cart', builder: (context, state) => const CartScreen()),
-      GoRoute(
-        path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
-      ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
+      // Đường dẫn chính
+      GoRoute(path: '/', builder: (context, state) => MainScreen()),
+      // Đường dẫn cho các màn hình khác
+      GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
+      GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
+      // Các route cho các màn hình khác
+      GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+      GoRoute(path: '/product', builder: (context, state) => ProductScreen()),
+      GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
+      GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
     ],
   );
 }
@@ -85,65 +79,67 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
-    const ProductScreen(),
-    const CartScreen(),
-    const ProfileScreen(),
+    HomeScreen(),
+    ProductScreen(),
+    CartScreen(),
+    ProfileScreen(),
   ];
 
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-
-    // Chuyển hướng đến màn hình đúng dựa trên chỉ mục
-    String routeName = '';
-    switch (index) {
-      case 0:
-        routeName = '/home';
-        break;
-      case 1:
-        routeName = '/products';
-        break;
-      case 2:
-        routeName = '/cart';
-        break;
-      case 3:
-        routeName = '/profile';
-        break;
-    }
-
-    // Sử dụng GoRouter để điều hướng
-    context.go(routeName);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Main Screen'),
-        backgroundColor: Colors.pink.shade300,
-      ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
         child: _screens[_selectedIndex],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Products'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.pink.shade700,
-        unselectedItemColor: Colors.grey[500],
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 10,
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 8, spreadRadius: 1),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.store),
+                label: 'Products',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_cart),
+                label: 'Cart',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Colors.pink.shade700,
+            unselectedItemColor: Colors.grey[500],
+            showUnselectedLabels: true,
+            backgroundColor: Colors.white,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            elevation: 10,
+          ),
+        ),
       ),
     );
   }
