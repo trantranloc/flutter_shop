@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -35,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Future.delayed(Duration.zero, () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
+            MaterialPageRoute(builder: (context) => RegisterScreen()),
           );
         });
       }
@@ -45,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Future.delayed(Duration.zero, () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => RegisterScreen()),
         );
       });
     }
