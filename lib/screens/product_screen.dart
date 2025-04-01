@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/services/product_service.dart';
 import 'package:flutter_shop/services/category_service.dart';
+import 'package:go_router/go_router.dart';
 import '../models/product.dart';
 import '../models/category.dart';
 import '../widgets/product_card.dart';
@@ -102,12 +103,13 @@ class _ProductScreenState extends State<ProductScreen> {
           IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
-              Navigator.pushNamed(context, '/cart').then((_) {
+              context.push('/cart').then((_) {
                 // Refresh products when returning from cart
                 _loadData();
               });
             },
           ),
+
           IconButton(icon: Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),

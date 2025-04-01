@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
 import '../models/cart_item.dart';
 import '../services/cart_service.dart';
 
@@ -137,7 +138,7 @@ class _CartScreenState extends State<CartScreen> {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Quay lại màn hình sản phẩm
+                        context.go('/home'); // Navigate to the home screen
                       },
                       child: Text('Tiếp tục mua sắm'),
                     ),

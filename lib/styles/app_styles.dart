@@ -28,4 +28,10 @@ class AppStyles {
     padding: EdgeInsets.symmetric(vertical: 14),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
+  static final redButton = ElevatedButton.styleFrom(
+    backgroundColor: Colors.redAccent,
+    foregroundColor: Colors.white,
+    padding: EdgeInsets.symmetric(vertical: 14),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  );
 }

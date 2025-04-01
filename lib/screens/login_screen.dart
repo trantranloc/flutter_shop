@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../styles/app_styles.dart';
 import 'register_screen.dart';
-import 'dart:convert';
 import 'home_screen.dart';
+import '../services/login_register_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,58 +17,76 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  String? _emailError;
+  String? _passwordError;
+  final RegisterLoginService _authService = RegisterLoginService();
 
-Future<void> _login() async {
-  setState(() => _isLoading = true);
+  // Hàm đăng nhập
+  Future<void> _login() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
 
-  final response = await http.get(
-    Uri.parse('https://676bfddfbc36a202bb866149.mockapi.io/api/v1/users'),
-  );
+    // Kiểm tra lỗi nhập liệu
+    setState(() {
+      _emailError = email.isEmpty ? "Email không được để trống!" : null;
+      _passwordError =
+          password.isEmpty ? "Mật khẩu không được để trống!" : null;
+    });
 
-  setState(() => _isLoading = false);
+    // Nếu có lỗi nhập liệu thì dừng lại
+    if (_emailError != null || _passwordError != null) {
+      return;
+    }
 
-  if (response.statusCode == 200) {
-    List<dynamic> users = jsonDecode(response.body);
+    setState(() => _isLoading = true);
 
-    final user = users.firstWhere(
-      (u) =>
-          u['email'] == _emailController.text &&
-          u['password'] == _passwordController.text,
-      orElse: () => {}, // Trả về Map rỗng thay vì null
-    );
-
-    if (user.isNotEmpty) { // Kiểm tra nếu user tồn tại
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Đăng nhập thành công! Xin chào, ${user['username']}"),
-          backgroundColor: Colors.green,
-        ),
+    try {
+      final response = await _authService.loginUser(
+        email: email,
+        password: password,
       );
+      setState(() => _isLoading = false);
 
-      // Chuyển hướng sau khi hiển thị thông báo
-      Future.delayed(Duration(seconds: 1), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+      // Kiểm tra kết quả từ API
+      if (response.statusCode == 200 && response.data['accessToken'] != null) {
+        // Lưu token vào SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token =
+            response.data['accessToken']; // Đảm bảo lấy đúng tên trường token
+        await prefs.setString('token', token); // Lưu token
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Đăng nhập thành công!"),
+            backgroundColor: Colors.green,
+          ),
         );
-      });
-    } else {
+
+        // Chuyển hướng tới trang chính sau khi đăng nhập thành công
+        Future.delayed(Duration(seconds: 1), () {
+          context.go('/home');
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response.data['error'] ?? "Sai tài khoản hoặc mật khẩu!",
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Sai tài khoản hoặc mật khẩu!"),
+          content: Text("Lỗi kết nối đến server!"),
           backgroundColor: Colors.red,
         ),
       );
     }
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Lỗi kết nối đến server!"),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,57 +94,62 @@ Future<void> _login() async {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                "Chào mừng trở lại!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green[800],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Chào mừng trở lại!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[800],
+                  ),
                 ),
-              ),
-              SizedBox(height: 32),
-              TextField(
-                controller: _emailController,
-                decoration: AppStyles.inputDecoration.copyWith(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email, color: Colors.green),
+                SizedBox(height: 32),
+                // TextField cho Email
+                TextField(
+                  controller: _emailController,
+                  decoration: AppStyles.inputDecoration.copyWith(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email, color: Colors.green),
+                    errorText: _emailError,
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: AppStyles.inputDecoration.copyWith(
-                  labelText: 'Mật khẩu',
-                  prefixIcon: Icon(Icons.lock, color: Colors.green),
+                SizedBox(height: 16),
+                // TextField cho Mật khẩu
+                TextField(
+                  controller: _passwordController,
+                  decoration: AppStyles.inputDecoration.copyWith(
+                    labelText: 'Mật khẩu',
+                    prefixIcon: Icon(Icons.lock, color: Colors.green),
+                    errorText: _passwordError,
+                  ),
+                  obscureText: true,
                 ),
-                obscureText: true,
-              ),
-              SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _login,
-                style: AppStyles.greenButton,
-                child:
-                    _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : Text("Đăng nhập"),
-              ),
-              SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterScreen()),
-                  );
-                },
-                style: AppStyles.outlinedGreenButton,
-                child: Text("Tạo tài khoản mới"),
-              ),
-            ],
+                SizedBox(height: 24),
+                // Nút đăng nhập
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  style: AppStyles.greenButton,
+                  child:
+                      _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Đăng nhập"),
+                ),
+                SizedBox(height: 16),
+                // Nút chuyển sang trang đăng ký
+                OutlinedButton(
+                  onPressed: () {
+                    context.go('/register');
+                  },
+                  style: AppStyles.outlinedGreenButton,
+                  child: Text("Tạo tài khoản mới"),
+                ),
+              ],
+            ),
           ),
         ),
       ),
