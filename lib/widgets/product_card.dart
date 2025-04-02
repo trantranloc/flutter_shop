@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop/screens/product_detail_screen.dart';
 import '../models/product.dart';
+import '../screens/product_detail_screen.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({required this.product, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,51 +18,63 @@ class ProductCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 5,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 2),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ảnh sản phẩm
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                 child: Image.network(
                   product.images.isNotEmpty
-                      ? product.images.first
-                      : 'https://via.placeholder.com/150', // Ảnh mặc định
+                      ? product.images[0]
+                      : 'https://via.placeholder.com/150',
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  errorBuilder:
-                      (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 100,
-                        color: Colors.grey,
-                      ),
                 ),
               ),
             ),
-            // Thông tin sản phẩm
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                product.name,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                "\$${product.price}",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pink.shade400,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
                 children: [
+                  Icon(Icons.star, color: Colors.amber, size: 16),
                   Text(
-                    product.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    "${product.rating.toStringAsFixed(1)}", 
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    '\$${product.price}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green[700],
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Spacer(),
+                  Icon(
+                    Icons.shopping_cart,
+                    color: Colors.pink.shade400,
+                    size: 20,
                   ),
                 ],
               ),

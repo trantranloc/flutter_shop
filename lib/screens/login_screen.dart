@@ -44,10 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       // Kiểm tra kết quả từ API
-      if (response.statusCode == 200 && response.data['token'] != null) {
+      if (response.statusCode == 200 && response.data['accessToken'] != null) {
         // Lưu token vào SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', response.data['token']); // Lưu token
+        String token =
+            response.data['accessToken']; // Đảm bảo lấy đúng tên trường token
+        await prefs.setString('token', token); // Lưu token
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Đăng nhập thành công!"), backgroundColor: Colors.green),
