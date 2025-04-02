@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/screens/login_screen.dart';
 import 'package:flutter_shop/services/login_register_service.dart';
+import 'package:go_router/go_router.dart';
 import '../styles/app_styles.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -35,22 +36,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Kiểm tra lỗi nhập liệu
     setState(() {
       _emailError = email.isEmpty ? "Email không được để trống!" : null;
-      _passwordError = password.isEmpty ? "Mật khẩu không được để trống!" : null;
-      _confirmPasswordError = confirmPassword.isEmpty ? "Nhập lại mật khẩu không được để trống!" : null;
+      _passwordError =
+          password.isEmpty ? "Mật khẩu không được để trống!" : null;
+      _confirmPasswordError =
+          confirmPassword.isEmpty
+              ? "Nhập lại mật khẩu không được để trống!"
+              : null;
     });
 
-    if (_emailError != null || _passwordError != null || _confirmPasswordError != null) {
+    if (_emailError != null ||
+        _passwordError != null ||
+        _confirmPasswordError != null) {
       return;
     }
 
     // Kiểm tra định dạng email
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+    if (!RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(email)) {
       setState(() => _emailError = "Email không hợp lệ!");
       return;
     }
 
     // Kiểm tra độ dài & điều kiện mật khẩu
-    if (password.length < 8 || !RegExp(r'^(?=.*[A-Z])(?=.*\d).+$').hasMatch(password)) {
+    if (password.length < 8 ||
+        !RegExp(r'^(?=.*[A-Z])(?=.*\d).+$').hasMatch(password)) {
       setState(() {
         _passwordError = "Mật khẩu ít nhất 6 ký tự, chứa 1 số và 1 chữ in hoa!";
       });
@@ -79,18 +89,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Đăng ký thành công!"), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text("Đăng ký thành công!"),
+            backgroundColor: Colors.green,
+          ),
         );
-        Navigator.pop(context);
+        context.go('/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['error'] ?? "Lỗi đăng ký!"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(responseData['error'] ?? "Lỗi đăng ký!"),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Lỗi kết nối đến server!"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("Lỗi kết nối đến server!"),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -165,21 +184,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: AppStyles.redButton,
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Create Account"),
+                  child:
+                      _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Create Account"),
                 ),
                 SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()), // Chuyển hướng tới trang đăng nhập
-                    );
+                    GoRouter.of(context).go('/login');
                   },
                   style: AppStyles.outlinedGreenButton,
                   child: Text("Already an Account ?"),
-                )
+                ),
               ],
             ),
           ),

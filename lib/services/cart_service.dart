@@ -1,31 +1,41 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../models/cart_item.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_shop/models/cart_item.dart';
+import 'api_service.dart';
 
 class CartService {
-  static const String baseUrl = 'YOUR_API_ENDPOINT/cart';
+  final ApiService _apiService = ApiService();
 
-  Future<List<CartItem>> fetchCart() async {
-    final response = await http.get(Uri.parse(baseUrl));
+  Future<List<CartItem>> fetchCart(String userId) async {
+    Response response = await _apiService.getRequest("/cart?userId=$userId");
 
     if (response.statusCode == 200) {
-      return (json.decode(response.body) as List)
-          .map((data) => CartItem.fromJson(data))
-          .toList();
-    } else {
-      throw Exception('Failed to load cart');
+      List data =
+          response.data['data']; // Lấy danh sách sản phẩm trong giỏ hàng
+      return data.map((json) => CartItem.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  Future<bool> updateCartItemQuantity(String itemId, int quantity) async {
+    try {
+      Response response = await _apiService.dio.put(
+        "/cart/item",
+        data: {'itemId': itemId, 'quantity': quantity},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Lỗi update giỏ hàng: $e");
+      return false;
     }
   }
 
-  Future<void> updateQuantity(String productId, int newQuantity) async {
-    await http.put(
-      Uri.parse('$baseUrl/$productId'),
-      body: jsonEncode({'quantity': newQuantity}),
-      headers: {'Content-Type': 'application/json'},
-    );
-  }
-
-  Future<void> removeFromCart(String productId) async {
-    await http.delete(Uri.parse('$baseUrl/$productId'));
+  Future<bool> removeCartItem(String itemId) async {
+    try {
+      Response response = await _apiService.dio.delete("/cart/item/$itemId");
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Lỗi xóa item khỏi giỏ hàng: $e");
+      return false;
+    }
   }
 }

@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../styles/app_styles.dart';
 import 'register_screen.dart';
@@ -29,7 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
     // Kiểm tra lỗi nhập liệu
     setState(() {
       _emailError = email.isEmpty ? "Email không được để trống!" : null;
-      _passwordError = password.isEmpty ? "Mật khẩu không được để trống!" : null;
+      _passwordError =
+          password.isEmpty ? "Mật khẩu không được để trống!" : null;
     });
 
     // Nếu có lỗi nhập liệu thì dừng lại
@@ -40,7 +41,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await _authService.loginUser(email: email, password: password);
+      final response = await _authService.loginUser(
+        email: email,
+        password: password,
+      );
       setState(() => _isLoading = false);
 
       // Kiểm tra kết quả từ API
@@ -52,25 +56,33 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('token', token); // Lưu token
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Đăng nhập thành công!"), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text("Đăng nhập thành công!"),
+            backgroundColor: Colors.green,
+          ),
         );
 
         // Chuyển hướng tới trang chính sau khi đăng nhập thành công
         Future.delayed(Duration(seconds: 1), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomeScreen()),
-          );
+          GoRouter.of(context).go('/');
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response.data['error'] ?? "Sai tài khoản hoặc mật khẩu!"), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(
+              response.data['error'] ?? "Sai tài khoản hoặc mật khẩu!",
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Lỗi kết nối đến server!"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("Lỗi kết nối đến server!"),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -122,18 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: AppStyles.greenButton,
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Đăng nhập"),
+                  child:
+                      _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Đăng nhập"),
                 ),
                 SizedBox(height: 16),
                 // Nút chuyển sang trang đăng ký
                 OutlinedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RegisterScreen()),
-                    );
+                    context.go('/register');
                   },
                   style: AppStyles.outlinedGreenButton,
                   child: Text("Tạo tài khoản mới"),

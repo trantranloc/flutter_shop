@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:http/http.dart' as http;
-import 'login_screen.dart';
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Thêm SharedPreferences
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,13 +19,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchProfile();
+    _checkLoginStatus();
   }
 
+  // Kiểm tra trạng thái đăng nhập
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      // Nếu không có token thì điều hướng đến màn hình đăng nhập
+      context.go('/login');
+    } else {
+      // Nếu có token thì tải thông tin người dùng
+      _fetchProfile();
+    }
+  }
+
+  // Hàm lấy thông tin người dùng
   Future<void> _fetchProfile() async {
     try {
       final response = await http.get(
         Uri.parse('http://localhost:8080/profile'),
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
@@ -49,6 +66,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           MaterialPageRoute(builder: (context) => RegisterScreen()),
         );
       });
+        // Điều hướng đến RegisterScreen nếu không có profile
+        context.go('/register');
+      }
+    } catch (e) {
+      print("Error: $e");
     } finally {
       setState(() => isLoading = false);
     }
@@ -66,13 +88,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isLoading
                 ? CircularProgressIndicator(color: Colors.pink.shade300)
                 : user == null
-                ? _buildGuestProfile()
+                ? _buildGuestProfile(context)
                 : _buildUserProfile(),
       ),
     );
   }
 
-  Widget _buildGuestProfile() {
+  Widget _buildGuestProfile(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -88,17 +110,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
-            );
+            // Điều hướng tới màn hình đăng nhập và sau khi quay lại sẽ refresh profile
+            context.push("/login").then((_) {
+              _fetchProfile();
+            });
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink.shade300,
-            padding: EdgeInsets.symmetric(
-              horizontal: 40,
-              vertical: 15,
-            ), // Bigger button
+            padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -148,20 +167,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildUserOptions() {
     return Column(
       children: [
-        _buildMenuItem(Icons.shopping_cart, "My Cart"),
-        _buildMenuItem(Icons.person, "Personal Information"),
-        _buildMenuItem(Icons.settings, "Settings"),
+        _buildMenuItem(Icons.shopping_cart, "My Cart", '/cart'),
+        _buildMenuItem(Icons.person, "Personal Information", '/profile'),
+        _buildMenuItem(Icons.settings, "Settings", '/settings'),
       ],
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title) {
+  Widget _buildMenuItem(IconData icon, String title, String route) {
     return ListTile(
       leading: Icon(icon, color: Colors.pink.shade300),
       title: Text(title, style: TextStyle(fontSize: 16)),
       onTap: () {
-        // Navigation function if needed
+        context.go(route); // Điều hướng đến route tương ứng
       },
     );
   }
-}
+
