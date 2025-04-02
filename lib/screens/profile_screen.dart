@@ -50,6 +50,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false;
         });
       } else {
+        // Delay điều hướng để tránh lỗi context chưa sẵn sàng
+        Future.delayed(Duration.zero, () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => RegisterScreen()),
+          );
+        });
+      }
+    } catch (e) {
+      print("Error: $e");
+      Future.delayed(Duration.zero, () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegisterScreen()),
+        );
+      });
         // Điều hướng đến RegisterScreen nếu không có profile
         context.go('/register');
       }
@@ -167,4 +183,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
-}
+
