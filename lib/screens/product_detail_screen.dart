@@ -1,45 +1,36 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../widgets/product_card.dart'; // Import ProductCard widget
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
+  final List<Product> allProducts; // Danh sách tất cả sản phẩm
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({
+    super.key,
+    required this.product,
+    required this.allProducts,
+  });
 
   @override
   _ProductDetailScreenState createState() => _ProductDetailScreenState();
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  int _quantity = 1; // Số lượng sản phẩm mặc định
-
-  void _increaseQuantity() {
-    if (_quantity < widget.product.stock) {
-      setState(() {
-        _quantity++;
-      });
-    }
-  }
-
-  void _decreaseQuantity() {
-    if (_quantity > 1) {
-      setState(() {
-        _quantity--;
-      });
-    }
-  }
-
-  void _addToCart() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${widget.product.name} đã được thêm vào giỏ hàng!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  }
+  int _quantity = 1;
 
   @override
   Widget build(BuildContext context) {
+    // Lọc danh sách sản phẩm liên quan (cùng category nhưng không phải chính nó)
+    List<Product> relatedProducts =
+        widget.allProducts
+            .where(
+              (p) =>
+                  p.category.name == widget.product.category.name &&
+                  p.id != widget.product.id,
+            )
+            .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product.name),
@@ -50,21 +41,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Hiển thị hình ảnh sản phẩm
+            // Ảnh sản phẩm
             Center(
-              child: Image.network(
-                widget.product.images.isNotEmpty
-                    ? widget.product.images.first
-                    : 'https://via.placeholder.com/150',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 250,
-                errorBuilder:
-                    (context, error, stackTrace) => Icon(
-                      Icons.image_not_supported,
-                      size: 100,
-                      color: Colors.grey,
-                    ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  widget.product.images.isNotEmpty
+                      ? widget.product.images.first
+                      : 'https://via.placeholder.com/150',
+                  width: double.infinity,
+                  height: 250,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) => Icon(
+                        Icons.image_not_supported,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
+                ),
               ),
             ),
             SizedBox(height: 16),
@@ -87,20 +81,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
             SizedBox(height: 8),
 
-            // Hiển thị đánh giá sao
-            Row(
-              children: [
-                Icon(Icons.star, color: Colors.amber, size: 20),
-                SizedBox(width: 4),
-                Text(
-                  widget.product.rating.toStringAsFixed(1),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Spacer(),
-              ],
-            ),
-            SizedBox(height: 16),
-
             // Mô tả sản phẩm
             Text(
               widget.product.description,
@@ -112,11 +92,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             Row(
               children: [
                 Text(
-                  "Số lượng: ",
+                  "Quantity:",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
-                  onPressed: _decreaseQuantity,
+                  onPressed:
+                      () => setState(
+                        () => _quantity = (_quantity > 1) ? _quantity - 1 : 1,
+                      ),
                   icon: Icon(Icons.remove_circle, color: Colors.red),
                 ),
                 Text(
@@ -124,7 +107,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
-                  onPressed: _increaseQuantity,
+                  onPressed: () => setState(() => _quantity++),
                   icon: Icon(Icons.add_circle, color: Colors.green),
                 ),
               ],
@@ -135,19 +118,74 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _addToCart,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${widget.product.name} đã được thêm vào giỏ hàng!',
+                      ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
                 icon: Icon(Icons.shopping_cart),
                 label: Text("Thêm vào giỏ hàng"),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: Colors.green,
                   textStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                 ),
               ),
             ),
+            SizedBox(height: 20),
+
+            // Hiển thị danh sách sản phẩm liên quan
+            Text(
+              "Related Products ",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+
+            relatedProducts.isNotEmpty
+                ? GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: relatedProducts.length,
+                  itemBuilder: (context, index) {
+                    final relatedProduct = relatedProducts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ProductDetailScreen(
+                                  product: relatedProduct,
+                                  allProducts: widget.allProducts,
+                                ),
+                          ),
+                        );
+                      },
+                      child: ProductCard(
+                        product: relatedProduct,
+                        allProducts: widget.allProducts,
+                      ),
+                    );
+                  },
+                )
+                : Text(""),
           ],
         ),
       ),

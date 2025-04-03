@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
@@ -124,6 +123,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          SizedBox(height: 20),
+          // Thêm avatar
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: NetworkImage(
+              user?['avatar'] ?? 'https://example.com/default_avatar.png',
+            ),
+            child:
+                user?['avatar'] == null
+                    ? Icon(Icons.person, size: 50, color: Colors.white)
+                    : null,
+          ),
           SizedBox(height: 20),
           Text(
             'Name: ${user?['name'] ?? ''}',

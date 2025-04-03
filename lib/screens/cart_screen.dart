@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // Import GoRouter
 import '../models/cart_item.dart';
-import '../services/cart_service.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -11,7 +10,6 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  final CartService _cartService = CartService();
   List<CartItem> cartItems = [];
   bool isLoading = true;
   final String userId = "userId";
@@ -37,7 +35,7 @@ class _CartScreenState extends State<CartScreen> {
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
-                        context.go('/home'); // Navigate to the home screen
+                        context.go('/home');
                       },
                       child: Text('Tiếp tục mua sắm'),
                     ),

@@ -10,6 +10,7 @@
 analyzer:
   errors:
     avoid_print: ignore
+    depend_on_referenced_packages: ignore
     library_private_types_in_public_api: ignore
     unnecessary_string_interpolations: ignore
     unnecessary_to_list_in_spreads: ignore

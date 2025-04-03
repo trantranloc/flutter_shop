@@ -4,8 +4,12 @@ import '../screens/product_detail_screen.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-
-  const ProductCard({required this.product, super.key});
+  final List<Product> allProducts;
+  const ProductCard({
+    required this.product,
+    required this.allProducts,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +18,11 @@ class ProductCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+            builder:
+                (context) => ProductDetailScreen(
+                  product: product,
+                  allProducts: allProducts,
+                ),
           ),
         );
       },
@@ -61,22 +69,28 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Icon(Icons.star, color: Colors.amber, size: 16),
-                  Text(
-                    "${product.rating.toStringAsFixed(1)}", 
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.shopping_cart,
-                    color: Colors.pink.shade400,
-                    size: 20,
-                  ),
-                ],
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Center(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          // Xử lý thêm vào giỏ hàng
+                        },
+                        icon: Icon(Icons.shopping_cart),
+                        label: Text(''),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
