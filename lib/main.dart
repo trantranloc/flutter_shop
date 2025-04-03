@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/screens/login_screen.dart';
+import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -7,8 +9,6 @@ import 'screens/home_screen.dart';
 import 'screens/product_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
 
 void main() {
   setUrlStrategy(PathUrlStrategy());
@@ -26,9 +26,15 @@ class MyApp extends StatelessWidget {
         builder: (context, state, child) => MainScreen(child: child),
         routes: [
           GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
-          GoRoute(path: '/product', builder: (context, state) => ProductScreen()),
+          GoRoute(
+            path: '/product',
+            builder: (context, state) => ProductScreen(),
+          ),
           GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
-          GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => ProfileScreen(),
+          ),
         ],
       ),
       // Các route riêng không có Navigation Bar

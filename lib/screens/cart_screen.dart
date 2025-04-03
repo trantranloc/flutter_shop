@@ -19,107 +19,12 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCart();
-  }
-
-  Future<void> _loadCart() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final items = await _cartService.fetchCart(userId);
-      setState(() {
-        cartItems = items;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching cart: $e');
-    }
-  }
-
-  Future<void> _updateItemQuantity(CartItem item, int newQuantity) async {
-    if (newQuantity < 1) return;
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // bool success = await _cartService.updateCartItemQuantity(
-      //   item.id,
-      //   newQuantity,
-      // );
-      // if (success) {
-      //   // Update locally without needing to reload entire cart
-      //   setState(() {
-      //     int index = cartItems.indexWhere((element) => element.id == item.id);
-      //     if (index != -1) {
-      //       cartItems[index] = CartItem(
-      //         id: item.id,
-      //         name: item.name,
-      //         price: item.price,
-      //         quantity: newQuantity,
-      //         imageUrl: item.imageUrl,
-      //       );
-      //     }
-      //   });
-      // } else {
-      //   ScaffoldMessenger.of(
-      //     context,
-      //   ).showSnackBar(SnackBar(content: Text('Không thể cập nhật số lượng')));
-      // }
-    } catch (e) {
-      print("Error updating item quantity: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _removeItem(String itemId) async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      bool success = await _cartService.removeCartItem(itemId);
-      if (success) {
-        setState(() {
-          cartItems.removeWhere((item) => item.id == itemId);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xóa sản phẩm khỏi giỏ hàng')),
-        );
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Không thể xóa sản phẩm')));
-      }
-    } catch (e) {
-      print("Error removing item: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  double _calculateTotal() {
-    return cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Giỏ hàng'),
-        actions: [IconButton(icon: Icon(Icons.refresh), onPressed: _loadCart)],
-      ),
+      appBar: AppBar(title: Text('Giỏ hàng')),
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
@@ -181,17 +86,10 @@ class _CartScreenState extends State<CartScreen> {
                                         Icons.remove_circle,
                                         color: Colors.red,
                                       ),
-                                      onPressed: () {
-                                        if (item.quantity > 1) {
-                                          _updateItemQuantity(
-                                            item,
-                                            item.quantity - 1,
-                                          );
-                                        }
-                                      },
+                                      onPressed: () {},
                                     ),
                                     Text(
-                                      '${item.quantity}',
+                                      '0 VND', // Provide the missing text argument
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
@@ -202,12 +100,7 @@ class _CartScreenState extends State<CartScreen> {
                                         Icons.add_circle,
                                         color: Colors.green,
                                       ),
-                                      onPressed: () {
-                                        _updateItemQuantity(
-                                          item,
-                                          item.quantity + 1,
-                                        );
-                                      },
+                                      onPressed: () {},
                                     ),
                                   ],
                                 ),
@@ -215,7 +108,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             trailing: IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _removeItem(item.id),
+                              onPressed: () {},
                             ),
                           ),
                         );
@@ -248,7 +141,7 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                             ),
                             Text(
-                              '\$${_calculateTotal().toStringAsFixed(2)}',
+                              "Null",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

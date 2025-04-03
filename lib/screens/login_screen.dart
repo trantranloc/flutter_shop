@@ -59,40 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           // Đăng nhập thành công - Nên có thông tin người dùng trong response
           print("Thông tin user: $response");
-
+          GoRouter.of(context).go('/home', extra: response);
           // Hiển thị thông báo thành công
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Đăng nhập thành công!"),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.pink,
               duration: Duration(seconds: 2),
             ),
           );
-
-          // Chuyển hướng tới trang chính sau khi hiển thị thông báo
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              // Kiểm tra widget có còn trong tree không
-              try {
-                // Sử dụng NavigatorState nếu có
-                if (Navigator.canPop(context)) {
-                  Navigator.of(context).pushReplacementNamed('/home');
-                } else {
-                  // Sử dụng GoRouter nếu đã thiết lập
-                  GoRouter.of(context).go('/');
-                }
-              } catch (e) {
-                print("Lỗi khi chuyển hướng: $e");
-                // Backup plan nếu các phương thức trên thất bại
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => HomeScreen(),
-                  ), // Thay thế bằng trang chính của bạn
-                  (route) => false,
-                );
-              }
-            }
-          });
         }
       } else {
         // Response là null
@@ -117,8 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryPink = Colors.pink;
+    final Color lightPink = Colors.pink[50]!;
+    final Color darkPink = Colors.pink[800]!;
+
     return Scaffold(
-      backgroundColor: Colors.green[50],
+      backgroundColor: lightPink,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -133,48 +112,79 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green[800],
+                    color: darkPink,
                   ),
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
                 // TextField cho Email
                 TextField(
                   controller: _emailController,
                   decoration: AppStyles.inputDecoration.copyWith(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email, color: Colors.green),
+                    prefixIcon: Icon(Icons.email, color: primaryPink),
                     errorText: _emailError,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // TextField cho Mật khẩu
                 TextField(
                   controller: _passwordController,
                   decoration: AppStyles.inputDecoration.copyWith(
                     labelText: 'Mật khẩu',
-                    prefixIcon: Icon(Icons.lock, color: Colors.green),
+                    prefixIcon: Icon(Icons.lock, color: primaryPink),
                     errorText: _passwordError,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 // Nút đăng nhập
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
-                  style: AppStyles.greenButton,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryPink,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child:
                       _isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text("Đăng nhập"),
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            "Đăng nhập",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Nút chuyển sang trang đăng ký
                 OutlinedButton(
                   onPressed: () {
                     context.go('/register');
                   },
-                  style: AppStyles.outlinedGreenButton,
-                  child: Text("Tạo tài khoản mới"),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: primaryPink),
+                    foregroundColor: primaryPink,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Tạo tài khoản mới",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),

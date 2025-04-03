@@ -87,9 +87,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text("Đăng ký thành công!"),
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.pink,
           ),
         );
         context.go('/login');
@@ -104,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Lỗi kết nối đến server!"),
           backgroundColor: Colors.red,
         ),
@@ -114,8 +114,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Color primaryPink = Colors.pink;
+    final Color lightPink = Colors.pink[50]!;
+    final Color darkPink = Colors.pink[800]!;
+
     return Scaffold(
-      backgroundColor: Colors.green[50],
+      backgroundColor: lightPink,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -125,75 +129,118 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  "Register Your Account",
+                  "Tạo tài khoản mới",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: darkPink,
                   ),
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
                 TextField(
                   controller: _firstNameController,
                   decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'First Name',
-                    prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    labelText: 'Họ',
+                    prefixIcon: Icon(Icons.person, color: primaryPink),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _lastNameController,
                   decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Last Name',
-                    prefixIcon: Icon(Icons.person, color: Colors.grey),
+                    labelText: 'Tên',
+                    prefixIcon: Icon(Icons.person, color: primaryPink),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _emailController,
                   decoration: AppStyles.inputDecoration.copyWith(
                     labelText: 'Email',
-                    prefixIcon: Icon(Icons.email, color: Colors.grey),
+                    prefixIcon: Icon(Icons.email, color: primaryPink),
                     errorText: _emailError,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _passwordController,
                   decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                    labelText: 'Mật khẩu',
+                    prefixIcon: Icon(Icons.lock, color: primaryPink),
                     errorText: _passwordError,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextField(
                   controller: _confirmPasswordController,
                   decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                    labelText: 'Nhập lại mật khẩu',
+                    prefixIcon: Icon(Icons.lock, color: primaryPink),
                     errorText: _confirmPasswordError,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: primaryPink, width: 2.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
-                  style: AppStyles.redButton,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryPink,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child:
                       _isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text("Create Account"),
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            "Đăng ký",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () {
                     GoRouter.of(context).go('/login');
                   },
-                  style: AppStyles.outlinedGreenButton,
-                  child: Text("Already an Account ?"),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: primaryPink),
+                    foregroundColor: primaryPink,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Đã có tài khoản?",
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             ),
