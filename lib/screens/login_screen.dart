@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_shop/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 import '../styles/app_styles.dart';
 import '../services/auth_service.dart';
@@ -93,100 +92,109 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final Color primaryPink = Colors.pink;
-    final Color lightPink = Colors.pink[50]!;
     final Color darkPink = Colors.pink[800]!;
 
-    return Scaffold(
-      backgroundColor: lightPink,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Chào mừng trở lại!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: darkPink,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                // TextField cho Email
-                TextField(
-                  controller: _emailController,
-                  decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email, color: primaryPink),
-                    errorText: _emailError,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: primaryPink, width: 2.0),
-                      borderRadius: BorderRadius.circular(8.0),
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/bg-auth.jpg'),
+          fit: BoxFit.cover, // Tràn toàn màn hình
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Welcome Back!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: darkPink,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                // TextField cho Mật khẩu
-                TextField(
-                  controller: _passwordController,
-                  decoration: AppStyles.inputDecoration.copyWith(
-                    labelText: 'Mật khẩu',
-                    prefixIcon: Icon(Icons.lock, color: primaryPink),
-                    errorText: _passwordError,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: primaryPink, width: 2.0),
-                      borderRadius: BorderRadius.circular(8.0),
+                  const SizedBox(height: 32),
+                  // TextField cho Email
+                  TextField(
+                    controller: _emailController,
+                    decoration: AppStyles.inputDecoration.copyWith(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email, color: primaryPink),
+                      errorText: _emailError,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryPink, width: 2.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
                   ),
-                  obscureText: true,
-                ),
-                const SizedBox(height: 24),
-                // Nút đăng nhập
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryPink,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 16),
+                  // TextField cho Mật khẩu
+                  TextField(
+                    controller: _passwordController,
+                    decoration: AppStyles.inputDecoration.copyWith(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock, color: primaryPink),
+                      errorText: _passwordError,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: primaryPink, width: 2.0),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
                     ),
+                    obscureText: true,
                   ),
-                  child:
-                      _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                            "Đăng nhập",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                  const SizedBox(height: 24),
+                  // Nút đăng nhập
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryPink,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child:
+                        _isLoading
+                            ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                            : const Text(
+                              "Login",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                ),
-                const SizedBox(height: 16),
-                // Nút chuyển sang trang đăng ký
-                OutlinedButton(
-                  onPressed: () {
-                    context.go('/register');
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: primaryPink),
-                    foregroundColor: primaryPink,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  ),
+                  const SizedBox(height: 16),
+                  // Nút chuyển sang trang đăng ký
+                  OutlinedButton(
+                    onPressed: () {
+                      context.go('/register');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primaryPink),
+                      foregroundColor: primaryPink,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      "Create an account",
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
-                  child: const Text(
-                    "Tạo tài khoản mới",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

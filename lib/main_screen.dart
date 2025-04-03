@@ -14,6 +14,9 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<String> _routes = ['/home', '/product', '/cart', '/profile'];
 
+  // Khai báo GlobalKey cho ScaffoldState
+  // final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -24,6 +27,18 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // key: _scaffoldKey,
+      // appBar: AppBar(
+      //   title: Text('Pink Blossom Shop'),
+      //   backgroundColor: Colors.pink.shade300,
+      //   leading: IconButton(
+      //     icon: Icon(Icons.menu), // Biểu tượng ba thanh gạch
+      //     onPressed: () {
+      //       // Mở Drawer khi nhấn vào biểu tượng menu
+      //       _scaffoldKey.currentState?.openDrawer();
+      //     },
+      //   ),
+      // ),
       body: widget.child, // Hiển thị nội dung của từng màn hình
       bottomNavigationBar: BottomNavigationBar(
         items: const [
@@ -42,6 +57,50 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
       ),
+      // drawer: Drawer(
+      //   child: ListView(
+      //     padding: EdgeInsets.zero,
+      //     children: [
+      //       DrawerHeader(
+      //         decoration: BoxDecoration(color: Colors.pink.shade300),
+      //         child: Text(
+      //           'Pink Blossom Shop',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 24,
+      //             fontWeight: FontWeight.bold,
+      //           ),
+      //         ),
+      //       ),
+      //       // Các mục trong Drawer
+      //       ListTile(
+      //         leading: Icon(Icons.home),
+      //         title: Text('Home'),
+      //         onTap: () {
+      //           // Điều hướng đến màn hình Home
+      //           Navigator.pushNamed(context, '/home');
+      //         },
+      //       ),
+      //       ListTile(
+      //         leading: Icon(Icons.shopping_cart),
+      //         title: Text('Cart'),
+      //         onTap: () {
+      //           // Điều hướng đến màn hình Cart
+      //           GoRouter.of(context).go('/cart');
+      //         },
+      //       ),
+      //       ListTile(
+      //         leading: Icon(Icons.account_circle),
+      //         title: Text('Profile'),
+      //         onTap: () {
+      //           // Điều hướng đến màn hình Profile
+      //           Navigator.pushNamed(context, '/profile');
+      //         },
+      //       ),
+      //       // Thêm các mục khác nếu cần
+      //     ],
+      //   ),
+      // ),
     );
   }
 }

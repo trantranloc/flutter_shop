@@ -10,16 +10,14 @@ class RegisterLoginService {
 
   // Hàm đăng ký người dùng
   Future<Response> registerUser({
-    required String firstName,
-    required String lastName,
+    required String name,
     required String email,
     required String password,
     required String confirmPassword,
   }) async {
     try {
       Map<String, dynamic> data = {
-        'firstName': firstName,
-        'lastName': lastName,
+        'name': name,
         'email': email,
         'password': password,
         'confirmPassword': confirmPassword,

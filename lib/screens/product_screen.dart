@@ -37,9 +37,6 @@ class _ProductScreenState extends State<ProductScreen> {
     try {
       // Tải danh sách danh mục từ API
       final categories = await _categoryService.fetchCategories();
-      for (var category in categories) {
-        print(category.name);
-      }
 
       // Tải danh sách sản phẩm từ API
       final products = await _productService.fetchProducts();
@@ -104,13 +101,12 @@ class _ProductScreenState extends State<ProductScreen> {
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
               context.push('/cart').then((_) {
-                // Refresh products when returning from cart
                 _loadData();
               });
             },
           ),
 
-          IconButton(icon: Icon(Icons.refresh), onPressed: _loadData),
+          // IconButton(icon: Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),
       body: Column(
@@ -133,7 +129,7 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
           // Widget lọc theo danh mục
           _buildCategoryFilter(),
-          Expanded(
+          Flexible(
             child:
                 _isLoading
                     ? Center(child: CircularProgressIndicator())
@@ -148,14 +144,17 @@ class _ProductScreenState extends State<ProductScreen> {
                       padding: EdgeInsets.all(8.0),
                       child: GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
+                          crossAxisCount: 3,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                           childAspectRatio: 0.75,
                         ),
                         itemCount: _filteredProducts.length,
                         itemBuilder: (context, index) {
-                          return ProductCard(product: _filteredProducts[index]);
+                          return ProductCard(
+                            product: _filteredProducts[index],
+                            allProducts: _products,
+                          );
                         },
                       ),
                     ),

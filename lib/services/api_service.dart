@@ -10,7 +10,7 @@ class ApiService {
   ApiService() {
     _dio.options.baseUrl = baseUrl;
     _dio.options.connectTimeout = const Duration(
-      seconds: 15,
+      seconds: 60,
     ); // Tăng timeout vì render.com có thể chậm
     _dio.options.receiveTimeout = const Duration(seconds: 15);
     _dio.options.contentType = 'application/json';
