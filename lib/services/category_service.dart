@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_service.dart';
 import '../models/category.dart';
 
@@ -6,6 +7,8 @@ class CategoryService {
   final ApiService _apiService = ApiService();
   List<Category> _cachedCategories = [];
   DateTime? _lastFetchTime;
+  final FlutterSecureStorage _storage =
+      FlutterSecureStorage(); // Khởi tạo FlutterSecureStorage
 
   Future<List<Category>> fetchCategories({bool forceRefresh = false}) async {
     // Return cached categories if they exist and are recent (less than 5 minutes old)
@@ -18,7 +21,11 @@ class CategoryService {
     }
 
     try {
-      Response response = await _apiService.getRequest("/category");
+      String? accessToken = await _storage.read(key: 'accessToken');
+      Response response = await _apiService.getRequest(
+        "/category",
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
         List data = response.data['data'];
@@ -55,7 +62,11 @@ class CategoryService {
     }
 
     try {
-      Response response = await _apiService.getRequest("/category/$id");
+      String? accessToken = await _storage.read(key: 'accessToken');
+      Response response = await _apiService.getRequest(
+        "/category/$id",
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
 
       if (response.statusCode == 200) {
         Map<String, dynamic> data = response.data['data'];

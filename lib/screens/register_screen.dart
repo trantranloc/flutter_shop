@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_shop/screens/login_screen.dart';
-import 'package:flutter_shop/services/login_register_service.dart';
+import 'package:flutter_shop/services/auth_service.dart';
 import 'package:go_router/go_router.dart';
 import '../styles/app_styles.dart';
 
