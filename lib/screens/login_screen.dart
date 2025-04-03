@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../styles/app_styles.dart';
-import 'register_screen.dart';
-import 'home_screen.dart';
-import '../services/login_register_service.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _passwordError;
   final RegisterLoginService _authService = RegisterLoginService();
 
-  // Hàm đăng nhập
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -45,42 +42,73 @@ class _LoginScreenState extends State<LoginScreen> {
         email: email,
         password: password,
       );
+
+      print("Phản hồi đăng nhập: $response");
       setState(() => _isLoading = false);
 
-      // Kiểm tra kết quả từ API
-      if (response.statusCode == 200 && response.data['accessToken'] != null) {
-        // Lưu token vào SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String token =
-            response.data['accessToken']; // Đảm bảo lấy đúng tên trường token
-        await prefs.setString('token', token); // Lưu token
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Đăng nhập thành công!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Chuyển hướng tới trang chính sau khi đăng nhập thành công
-        Future.delayed(Duration(seconds: 1), () {
-          GoRouter.of(context).go('/');
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response.data['error'] ?? "Sai tài khoản hoặc mật khẩu!",
+      // Kiểm tra phản hồi từ server
+      if (response != null) {
+        if (response.containsKey('error')) {
+          // Xử lý lỗi
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['error'] ?? "Đăng nhập thất bại!"),
+              backgroundColor: Colors.red,
             ),
+          );
+        } else {
+          // Đăng nhập thành công - Nên có thông tin người dùng trong response
+          print("Thông tin user: $response");
+
+          // Hiển thị thông báo thành công
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Đăng nhập thành công!"),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+
+          // Chuyển hướng tới trang chính sau khi hiển thị thông báo
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              // Kiểm tra widget có còn trong tree không
+              try {
+                // Sử dụng NavigatorState nếu có
+                if (Navigator.canPop(context)) {
+                  Navigator.of(context).pushReplacementNamed('/home');
+                } else {
+                  // Sử dụng GoRouter nếu đã thiết lập
+                  GoRouter.of(context).go('/');
+                }
+              } catch (e) {
+                print("Lỗi khi chuyển hướng: $e");
+                // Backup plan nếu các phương thức trên thất bại
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(),
+                  ), // Thay thế bằng trang chính của bạn
+                  (route) => false,
+                );
+              }
+            }
+          });
+        }
+      } else {
+        // Response là null
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Không nhận được phản hồi từ server!"),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
+      print("Lỗi khi đăng nhập: $e");
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Lỗi kết nối đến server!"),
+          content: Text("Lỗi kết nối đến server: $e"),
           backgroundColor: Colors.red,
         ),
       );

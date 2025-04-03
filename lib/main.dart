@@ -2,29 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-// Màn hình chính
+import 'main_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/product_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/login_screen.dart'; // Thêm màn hình Login
-import 'screens/register_screen.dart'; // Thêm màn hình Register
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 
 void main() {
-  setUrlStrategy(PathUrlStrategy()); 
+  setUrlStrategy(PathUrlStrategy());
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-   MyApp({super.key});
+  MyApp({super.key});
+
+  final GoRouter _router = GoRouter(
+    initialLocation: '/home',
+    routes: [
+      // Route chính với ShellRoute để giữ lại BottomNavigationBar
+      ShellRoute(
+        builder: (context, state, child) => MainScreen(child: child),
+        routes: [
+          GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+          GoRoute(path: '/product', builder: (context, state) => ProductScreen()),
+          GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
+          GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
+        ],
+      ),
+      // Các route riêng không có Navigation Bar
+      GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
+      GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.pink.shade300, // Light pink theme
-        scaffoldBackgroundColor: Colors.pink.shade50, // Soft background
+        primaryColor: Colors.pink.shade300,
+        scaffoldBackgroundColor: Colors.pink.shade50,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.pink.shade300,
           foregroundColor: Colors.white,
@@ -46,101 +65,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      routerConfig: _router, // Cấu hình router tại đây
-    );
-  }
-
-  // Cấu hình GoRouter
-  final GoRouter _router = GoRouter(
-    initialLocation: '/', // Đặt màn hình mặc định khi khởi động
-    routes: [
-      // Đường dẫn chính
-      GoRoute(path: '/', builder: (context, state) => MainScreen()),
-      // Đường dẫn cho các màn hình khác
-      GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
-      GoRoute(path: '/register', builder: (context, state) => RegisterScreen()),
-      // Các route cho các màn hình khác
-      GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
-      GoRoute(path: '/product', builder: (context, state) => ProductScreen()),
-      GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
-      GoRoute(path: '/profile', builder: (context, state) => ProfileScreen()),
-    ],
-  );
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  _MainScreenState createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    HomeScreen(),
-    ProductScreen(),
-    CartScreen(),
-    ProfileScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: AnimatedSwitcher(
-        duration: Duration(milliseconds: 300),
-        child: _screens[_selectedIndex],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          boxShadow: [
-            BoxShadow(color: Colors.black12, blurRadius: 8, spreadRadius: 1),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.store),
-                label: 'Products',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.shopping_cart),
-                label: 'Cart',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Profile',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            selectedItemColor: Colors.pink.shade700,
-            unselectedItemColor: Colors.grey[500],
-            showUnselectedLabels: true,
-            backgroundColor: Colors.white,
-            onTap: _onItemTapped,
-            type: BottomNavigationBarType.fixed,
-            elevation: 10,
-          ),
-        ),
-      ),
+      routerConfig: _router,
     );
   }
 }

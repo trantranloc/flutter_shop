@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_shop/screens/register_screen.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Thêm SharedPreferences
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,64 +14,55 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? user;
   bool isLoading = true;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    _fetchUserInfo();
   }
 
-  // Kiểm tra trạng thái đăng nhập
-  Future<void> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    if (token == null) {
-      // Nếu không có token thì điều hướng đến màn hình đăng nhập
-      context.go('/login');
-    } else {
-      // Nếu có token thì tải thông tin người dùng
-      _fetchProfile();
-    }
-  }
-
-  // Hàm lấy thông tin người dùng
-  Future<void> _fetchProfile() async {
+  // Lấy thông tin người dùng
+  Future<void> _fetchUserInfo() async {
     try {
-      final response = await http.get(
-        Uri.parse('http://localhost:8080/profile'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      // Đọc accessToken từ Secure Storage
+      String? token = await _storage.read(key: 'accessToken');
+      if (token == null) {
+        context.go('/login');
+        return;
+      }
 
-      if (response.statusCode == 200) {
+      // Đọc thông tin user từ Secure Storage
+      String? userInfoString = await _storage.read(key: 'user');
+
+      if (userInfoString == null || userInfoString.isEmpty) {
+        print('Dữ liệu người dùng trống');
         setState(() {
-          user = json.decode(response.body);
           isLoading = false;
         });
-      } else {
-        // Delay điều hướng để tránh lỗi context chưa sẵn sàng
-        Future.delayed(Duration.zero, () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => RegisterScreen()),
-          );
+        return;
+      }
+
+      print('Dữ liệu nhận được: $userInfoString');
+
+      try {
+        // Chuyển đổi chuỗi JSON thành đối tượng Map
+        Map<String, dynamic> userInfo = json.decode(userInfoString);
+        setState(() {
+          user = userInfo;
+          isLoading = false;
+        });
+      } catch (e) {
+        print("Lỗi khi phân tích JSON: $e");
+        setState(() {
+          isLoading = false;
         });
       }
-    } catch (e) {
-      print("Error: $e");
-      Future.delayed(Duration.zero, () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => RegisterScreen()),
-        );
+    } catch (error) {
+      print('Lỗi khi lấy thông tin người dùng: $error');
+      setState(() {
+        isLoading = false;
       });
-        // Điều hướng đến RegisterScreen nếu không có profile
-        context.go('/register');
-      }
-    } catch (e) {
-      print("Error: $e");
-    } finally {
-      setState(() => isLoading = false);
     }
   }
 
@@ -98,10 +88,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundImage: AssetImage('assets/default_user.png'),
-        ),
         SizedBox(height: 20),
         Text(
           "Welcome to our flower shop!",
@@ -110,10 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(height: 10),
         ElevatedButton(
           onPressed: () {
-            // Điều hướng tới màn hình đăng nhập và sau khi quay lại sẽ refresh profile
-            context.push("/login").then((_) {
-              _fetchProfile();
-            });
+            context.push("/login");
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.pink.shade300,
@@ -141,20 +124,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage(
-              user!['avatarUrl'] ?? 'https://via.placeholder.com/150',
-            ),
-          ),
           SizedBox(height: 20),
           Text(
-            'Name: ${user!['name']}',
+            'Name: ${user?['name'] ?? ''}',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 10),
           Text(
-            'Email: ${user!['email']}',
+            'Email: ${user?['email'] ?? 'Chưa có email'}',
             style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           ),
           SizedBox(height: 20),

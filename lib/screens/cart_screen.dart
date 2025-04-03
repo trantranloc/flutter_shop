@@ -37,9 +37,7 @@ class _CartScreenState extends State<CartScreen> {
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Không thể tải giỏ hàng: $e')));
+      print('Error fetching cart: $e');
     }
   }
 
@@ -51,33 +49,31 @@ class _CartScreenState extends State<CartScreen> {
     });
 
     try {
-      bool success = await _cartService.updateCartItemQuantity(
-        item.id,
-        newQuantity,
-      );
-      if (success) {
-        // Update locally without needing to reload entire cart
-        setState(() {
-          int index = cartItems.indexWhere((element) => element.id == item.id);
-          if (index != -1) {
-            cartItems[index] = CartItem(
-              id: item.id,
-              name: item.name,
-              price: item.price,
-              quantity: newQuantity,
-              imageUrl: item.imageUrl,
-            );
-          }
-        });
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Không thể cập nhật số lượng')));
-      }
+      // bool success = await _cartService.updateCartItemQuantity(
+      //   item.id,
+      //   newQuantity,
+      // );
+      // if (success) {
+      //   // Update locally without needing to reload entire cart
+      //   setState(() {
+      //     int index = cartItems.indexWhere((element) => element.id == item.id);
+      //     if (index != -1) {
+      //       cartItems[index] = CartItem(
+      //         id: item.id,
+      //         name: item.name,
+      //         price: item.price,
+      //         quantity: newQuantity,
+      //         imageUrl: item.imageUrl,
+      //       );
+      //     }
+      //   });
+      // } else {
+      //   ScaffoldMessenger.of(
+      //     context,
+      //   ).showSnackBar(SnackBar(content: Text('Không thể cập nhật số lượng')));
+      // }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      print("Error updating item quantity: $e");
     } finally {
       setState(() {
         isLoading = false;
@@ -105,9 +101,7 @@ class _CartScreenState extends State<CartScreen> {
         ).showSnackBar(SnackBar(content: Text('Không thể xóa sản phẩm')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      print("Error removing item: $e");
     } finally {
       setState(() {
         isLoading = false;

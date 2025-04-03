@@ -16,22 +16,22 @@ class CartService {
     return [];
   }
 
-  Future<bool> updateCartItemQuantity(String itemId, int quantity) async {
-    try {
-      Response response = await _apiService.dio.put(
-        "/cart/item",
-        data: {'itemId': itemId, 'quantity': quantity},
-      );
-      return response.statusCode == 200;
-    } catch (e) {
-      print("Lỗi update giỏ hàng: $e");
-      return false;
-    }
-  }
+  // Future<bool> updateCartItemQuantity(String itemId, int quantity) async {
+  //   try {
+  //     Response response = await _apiService.postRequest(
+  //       "/cart/item",
+  //       : {'itemId': itemId, 'quantity': quantity},
+  //     );
+  //     return response.statusCode == 200;
+  //   } catch (e) {
+  //     print("Lỗi update giỏ hàng: $e");
+  //     return false;
+  //   }
+  // }
 
   Future<bool> removeCartItem(String itemId) async {
     try {
-      Response response = await _apiService.dio.delete("/cart/item/$itemId");
+      Response response = await _apiService.deleteRequest("/cart/item/$itemId");
       return response.statusCode == 200;
     } catch (e) {
       print("Lỗi xóa item khỏi giỏ hàng: $e");
