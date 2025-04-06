@@ -36,4 +36,8 @@ class Product {
       rating: (json['rating'] ?? 0).toDouble(),
     );
   }
+  @override
+  String toString() {
+    return 'Product(id: $id, name: $name, price: $price, stock: $stock, quantity: $quantity, rating: $rating, category: $category)';
+  }
 }

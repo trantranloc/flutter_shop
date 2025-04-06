@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/services/product_service.dart';
-import '../widgets/home_banner.dart'; // Widget banner
+import '../widgets/home_banner.dart';
 import '../models/product.dart';
-// import '../models/category.dart';
 import '../widgets/product_card.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
@@ -16,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ProductService _productService = ProductService();
   List<Product> _products = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -24,18 +24,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() {});
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       final products = await _productService.fetchProducts();
-      print(products);
+      // print(products);
 
       setState(() {
         _products = products;
+        _isLoading = false;
       });
     } catch (e) {
       print("Error loading data: $e");
-      setState(() {});
+      setState(() {
+        _isLoading = false;
+      });
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Không thể tải dữ liệu: $e')));
@@ -57,39 +62,60 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Colors.pink, // 🌸 Màu AppBar
       ),
-      body: Column(
-        children: [
-          HomeBanner(),
-          SizedBox(height: 20),
-          _buildProductCarousel(),
-          Text(
-            "New Arrival Items",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.pink, // 🌸 Màu chữ
-            ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
+      body:
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _products.isEmpty
+              ? Center(child: Text('No products available'))
+              : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    HomeBanner(),
+                    SizedBox(height: 20),
+                    _buildProductCarousel(),
+                    SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        "New Arrival Items",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.pink, // 🌸 Màu chữ
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    _buildProductGrid(),
+                  ],
+                ),
               ),
-              itemCount: 9,
-              itemBuilder: (context, index) {
-                return ProductCard(
-                  product: _products[index],
-                  allProducts: _products,
-                ); // 🛍️ Hiển thị sản phẩm
-              },
-            ),
-          ),
-        ],
+    );
+  }
+
+  Widget _buildProductGrid() {
+    // Calculate the number of products to display, with a maximum of 9
+    final displayCount = _products.length > 9 ? 9 : _products.length;
+
+    return GridView.builder(
+      padding: EdgeInsets.all(10),
+      shrinkWrap: true, // Allow the grid to take only the space it needs
+      physics:
+          NeverScrollableScrollPhysics(), // Disable scrolling of the grid itself
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.7, // Tỷ lệ chiều rộng/chiều cao của mỗi ô
       ),
+      itemCount: displayCount,
+      itemBuilder: (context, index) {
+        return ProductCard(
+          product: _products[index],
+          allProducts: _products,
+        ); // 🛍️ Hiển thị sản phẩm
+      },
     );
   }
 
@@ -120,8 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             // Hình ảnh sản phẩm
             Image.network(
-              product
-                  .images[0], // Giả sử sản phẩm có thuộc tính images (danh sách ảnh)
+              product.images[0],
               width: 300, // Kích thước ảnh
               height: 250, // Kích thước ảnh
               fit: BoxFit.cover,
@@ -136,7 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.black.withOpacity(0.3), // Mờ từ trên
-                    // ignore: deprecated_member_use
                     Colors.black.withOpacity(0.7),
                   ],
                 ),
@@ -164,13 +188,14 @@ class _HomeScreenState extends State<HomeScreen> {
               left: 10,
               right: 10,
               child: Text(
-                product
-                    .description, // Giả sử sản phẩm có thuộc tính description
+                product.description,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.white.withOpacity(0.8), // Màu chữ mờ một chút
                 ),
                 textAlign: TextAlign.center, // Căn giữa chữ
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
