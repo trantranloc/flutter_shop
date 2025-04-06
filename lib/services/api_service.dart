@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiService {
   final Dio _dio = Dio();
   final String baseUrl =
-      'https://express-lirisflora-api.onrender.com/api'; // Cập nhật base URL
+      'https://express-lirisflora-api.onrender.com/api';
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   ApiService() {
@@ -12,12 +12,13 @@ class ApiService {
     _dio.options.connectTimeout = const Duration(
       seconds: 60,
     ); // Tăng timeout vì render.com có thể chậm
-    _dio.options.receiveTimeout = const Duration(seconds: 15);
+    _dio.options.receiveTimeout = const Duration(seconds: 60);
     _dio.options.contentType = 'application/json';
 
     // Thêm interceptor để log và debug
     _dio.interceptors.add(
       LogInterceptor(
+
         requestBody: true,
         responseBody: true,
         requestHeader: true,

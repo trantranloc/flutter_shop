@@ -14,10 +14,10 @@ class CategoryService {
         List data = response.data['data'];
         _cachedCategories =
             data.map((json) => Category.fromJson(json)).toList();
-        print("Fetched categories: $_cachedCategories");
+        // print("Fetched categories: $_cachedCategories");
         return _cachedCategories;
       } else {
-        print("Error fetching categories: Status ${response.statusCode}");
+        // print("Error fetching categories: Status ${response.statusCode}");
         // If we have cached categories and the request failed, return the cached data
         if (_cachedCategories.isNotEmpty) {
           return _cachedCategories;

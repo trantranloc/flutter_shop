@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/screens/checkout_screen.dart';
 import 'package:flutter_shop/screens/login_screen.dart';
 import 'package:flutter_shop/screens/register_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import 'main_screen.dart';
 import 'screens/home_screen.dart';
@@ -11,7 +12,7 @@ import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 
 void main() {
-  setUrlStrategy(PathUrlStrategy());
+  // setUrlStrategy(PathUrlStrategy());
   runApp(MyApp());
 }
 
@@ -31,6 +32,10 @@ class MyApp extends StatelessWidget {
             builder: (context, state) => ProductScreen(),
           ),
           GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
+          GoRoute(
+            path: '/checkout',
+            builder: (context, state) => CheckOutScreen(),
+          ),
           GoRoute(
             path: '/profile',
             builder: (context, state) => ProfileScreen(),
