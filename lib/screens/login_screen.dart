@@ -18,18 +18,55 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _passwordError;
   final RegisterLoginService _authService = RegisterLoginService();
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Kiểm tra định dạng email
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return "Email không được để trống!";
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return "Email không đúng định dạng!";
+    }
+    return null;
+  }
+
+  // Kiểm tra yêu cầu mật khẩu
+  String? _validatePassword(String password) {
+    if (password.isEmpty) {
+      return "Mật khẩu không được để trống!";
+    }
+    if (password.length < 8) {
+      return "Mật khẩu phải có ít nhất 8 ký tự!";
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return "Mật khẩu phải có ít nhất 1 chữ cái in hoa!";
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return "Mật khẩu phải có ít nhất 1 số!";
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return "Mật khẩu phải có ít nhất 1 ký tự đặc biệt!";
+    }
+    return null;
+  }
+
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
     // Kiểm tra lỗi nhập liệu
     setState(() {
-      _emailError = email.isEmpty ? "Email không được để trống!" : null;
-      _passwordError =
-          password.isEmpty ? "Mật khẩu không được để trống!" : null;
+      _emailError = _validateEmail(email);
+      _passwordError = _validatePassword(password);
     });
 
-    // Nếu có lỗi nhập liệu thì dừng lại
     if (_emailError != null || _passwordError != null) {
       return;
     }
@@ -42,51 +79,60 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      print("Phản hồi đăng nhập: $response");
       setState(() => _isLoading = false);
 
-      // Kiểm tra phản hồi từ server
       if (response != null) {
-        if (response.containsKey('error')) {
-          // Xử lý lỗi
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response['error'] ?? "Đăng nhập thất bại!"),
-              backgroundColor: Colors.red,
-            ),
-          );
+        // Kiểm tra nếu response là một Map (JSON) và có chứa mã lỗi
+        if (response.containsKey('statusCode') &&
+            response['statusCode'] == 401) {
+          // Xử lý lỗi 401: Invalid email or password
+          _showErrorSnackBar("Invalid email or password");
+        } else if (response.containsKey('error')) {
+          // Xử lý các lỗi khác từ server
+          String errorMessage = response['error'];
+          if (errorMessage.toLowerCase().contains('password') ||
+              errorMessage.toLowerCase().contains('mật khẩu')) {
+            _showErrorSnackBar("Mật khẩu không đúng!");
+          } else if (errorMessage.toLowerCase().contains('email') ||
+              errorMessage.toLowerCase().contains('user not found')) {
+            _showErrorSnackBar("Email không tồn tại!");
+          } else if (errorMessage == "Invalid email or password") {
+            _showErrorSnackBar("Email hoặc mật khẩu không hợp lệ!");
+          } else {
+            _showErrorSnackBar(errorMessage);
+          }
         } else {
-          // Đăng nhập thành công - Nên có thông tin người dùng trong response
-          print("Thông tin user: $response");
-          GoRouter.of(context).go('/home', extra: response);
-          // Hiển thị thông báo thành công
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Đăng nhập thành công!"),
-              backgroundColor: Colors.pink,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          // Đăng nhập thành công
+          _handleSuccessfulLogin(response);
         }
       } else {
-        // Response là null
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Không nhận được phản hồi từ server!"),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showErrorSnackBar("Không nhận được phản hồi từ server!");
       }
     } catch (e) {
-      print("Lỗi khi đăng nhập: $e");
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lỗi kết nối đến server: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showErrorSnackBar("Lỗi kết nối đến server: $e");
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _handleSuccessfulLogin(Map<String, dynamic> response) {
+    GoRouter.of(context).go('/home', extra: response);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Đăng nhập thành công!"),
+        backgroundColor: Colors.pink,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
