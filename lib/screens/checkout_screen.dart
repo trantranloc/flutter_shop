@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_shop/models/cart_item.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
 import '../services/cart_service.dart';
@@ -93,7 +94,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     });
 
     try {
-      final items = _cartService.getCartItems();
+      final items = await _cartService.getCartItems();
       setState(() {
         _cartItems = items;
         _isLoading = false;
@@ -195,7 +196,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     setState(() => isSubmitting = true);
 
     try {
-      final paymentUrl = await _cartService.initiateVnpayPayment();
+      // final paymentUrl = await _cartService.initiateVnpayPayment();
 
       if (mounted) {
         showDialog(
@@ -204,7 +205,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
               (_) => AlertDialog(
                 title: const Text('Thanh toán VNPay'),
                 content: Text(
-                  'Chuyển hướng đến: $paymentUrl\n(Vui lòng hoàn tất thanh toán)',
+                  'Chuyển hướng đến:(Vui lòng hoàn tất thanh toán)',
+                  // 'Chuyển hướng đến: $paymentUrl\n(Vui lòng hoàn tất thanh toán)',
                 ),
                 actions: [
                   TextButton(

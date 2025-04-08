@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_shop/screens/checkout_screen.dart';
 import 'package:flutter_shop/screens/login_screen.dart';
 import 'package:flutter_shop/screens/register_screen.dart';
+import 'package:flutter_shop/screens/order_list_screen.dart';
+import 'package:flutter_shop/screens/order_detail_screen.dart';
 import 'package:go_router/go_router.dart';
 // import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -35,6 +37,17 @@ class MyApp extends StatelessWidget {
           GoRoute(
             path: '/checkout',
             builder: (context, state) => CheckOutScreen(),
+          ),
+          GoRoute(
+            path: '/orders',
+            builder: (context, state) => const OrderListScreen(),
+          ),
+          GoRoute(
+            path: '/order/:orderId',
+            builder: (context, state) {
+              final orderId = state.pathParameters['orderId']!;
+              return OrderDetailScreen(orderId: orderId);
+            },
           ),
           GoRoute(
             path: '/profile',

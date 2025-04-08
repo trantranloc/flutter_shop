@@ -40,4 +40,6 @@ class Product {
   String toString() {
     return 'Product(id: $id, name: $name, price: $price, stock: $stock, quantity: $quantity, rating: $rating, category: $category)';
   }
+
+  toJson() {}
 }

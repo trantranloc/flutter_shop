@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_shop/models/cart_item.dart';
 import 'package:go_router/go_router.dart';
 import '../services/cart_service.dart';
-import '../widgets/card_item.dart';
+import '../widgets/card_item.dart'; // Giả sử đây là widget hiển thị từng item giỏ hàng
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -45,11 +46,13 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
+  // Ví dụ về tính tổng tiền giỏ hàng (_totalAmount)
   double get _totalAmount {
-    return _cartItems.fold(
-      0,
-      (sum, item) => sum + (item.product.price * item.quantity),
-    );
+    double total = 0;
+    for (var item in _cartItems) {
+      total += item.price * item.quantity;
+    }
+    return total;
   }
 
   Future<void> _updateQuantity(CartItem item, int newQuantity) async {
@@ -59,10 +62,14 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     setState(() {
-      // Update in local state first for immediate UI response
+      // Update in local state for immediate UI response
       final index = _cartItems.indexOf(item);
       if (index != -1) {
         _cartItems[index] = CartItem(
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          images: item.images,
           product: item.product,
           quantity: newQuantity,
         );
@@ -82,7 +89,6 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> _removeItem(CartItem item) async {
     setState(() {
-      // Remove from local state first for immediate UI response
       _cartItems.remove(item);
     });
 
@@ -90,7 +96,6 @@ class _CartScreenState extends State<CartScreen> {
       _cartService.removeFromCart(item.product.id);
     } catch (e) {
       print("Error removing item: $e");
-      // Reload cart if operation fails
       await _loadCartItems();
       ScaffoldMessenger.of(
         context,
@@ -230,7 +235,7 @@ class _CartScreenState extends State<CartScreen> {
           SizedBox(height: 10),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Go back to previous screen
+              GoRouter.of(context).go('/product');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.pink,

@@ -1,77 +1,101 @@
-import 'package:flutter_shop/services/api_service.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../models/product.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_shop/models/product.dart';
+import 'package:flutter_shop/models/cart_item.dart';
+import 'package:flutter_shop/services/api_service.dart';
 
 class CartService {
   static final CartService _instance = CartService._internal();
   final ApiService _apiService = ApiService();
-
-  factory CartService() {
-    return _instance;
-  }
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   CartService._internal();
+  factory CartService() => _instance;
 
   final List<CartItem> _cartItems = [];
 
-  // Get all cart items
+  // Lưu giỏ hàng vào bộ nhớ
+  Future<void> _saveCartToStorage() async {
+    final cartJson = jsonEncode(
+      _cartItems.map((item) => item.toJson()).toList(),
+    );
+
+    await _storage.write(key: 'cart', value: cartJson);
+    print('Giỏ hàng đã được lưu vào bộ nhớ: $cartJson');
+  }
+
+  // Lấy tất cả các sản phẩm trong giỏ hàng
   List<CartItem> getCartItems() {
     return [..._cartItems];
   }
 
-  // Add product to cart
-  void addToCart(Product product, [int quantity = 1]) {
+  // Thêm sản phẩm vào giỏ hàng
+  void addToCart(Product product, [int quantity = 1]) async {
     final existingIndex = _cartItems.indexWhere(
       (item) => item.product.id == product.id,
     );
 
     if (existingIndex >= 0) {
       _cartItems[existingIndex] = CartItem(
-        product: product,
+        id: _cartItems[existingIndex].id,
+        name: product.name,
+        price: product.price,
         quantity: _cartItems[existingIndex].quantity + quantity,
+        images: product.images[0],
+        product: product,
       );
     } else {
-      _cartItems.add(CartItem(product: product, quantity: quantity));
+      _cartItems.add(
+        CartItem(
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: quantity,
+          images: product.images[0],
+          product: product,
+        ),
+      );
     }
+    await _saveCartToStorage();
   }
 
-  // Update quantity of a cart item
+  // Cập nhật số lượng sản phẩm trong giỏ
   void updateCartItem(String productId, int quantity) {
     final index = _cartItems.indexWhere((item) => item.product.id == productId);
 
     if (index >= 0) {
       _cartItems[index] = CartItem(
-        product: _cartItems[index].product,
+        id: _cartItems[index].id,
+        name: _cartItems[index].name,
+        price: _cartItems[index].price,
         quantity: quantity,
+        images: _cartItems[index].images,
+        product: _cartItems[index].product,
       );
     }
   }
 
-  // Remove product from cart
+  // Xóa sản phẩm khỏi giỏ hàng
   void removeFromCart(String productId) {
     _cartItems.removeWhere((item) => item.product.id == productId);
   }
 
-  // Clear entire cart
+  // Xóa toàn bộ giỏ hàng
   void clearCart() {
     _cartItems.clear();
   }
 
-  // Get cart total
+  // Tính tổng giỏ hàng
   double getCartTotal() {
-    return _cartItems.fold(
-      0,
-      (sum, item) => sum + item.product.price * item.quantity,
-    );
+    return _cartItems.fold(0, (sum, item) => sum + item.price * item.quantity);
   }
 
-  // Get cart item count
+  // Lấy tổng số lượng sản phẩm trong giỏ hàng
   int getCartItemCount() {
     return _cartItems.fold(0, (sum, item) => sum + item.quantity);
   }
 
-  // Submit order (for COD)
+  // Đặt hàng
   Future<void> submitOrder({
     required Map<String, dynamic> user,
     required Map<String, dynamic> billingData,
@@ -93,16 +117,14 @@ class CartService {
                 (item) => {
                   'productId': item.product.id,
                   'quantity': item.quantity,
-                  'price': item.product.price,
-                  'name': item.product.name,
+                  'price': item.price,
+                  'name': item.name,
                 },
               )
               .toList(),
     };
 
     try {
-      print("Order data: $orderData");
-
       final response = await _apiService.postRequest(
         "/order",
         jsonEncode(orderData),
@@ -117,39 +139,7 @@ class CartService {
       }
       clearCart(); // Xóa giỏ hàng sau khi đặt hàng thành công
     } catch (e) {
-      print("Error submitting order: $e");
       throw Exception('Không thể đặt hàng: $e');
     }
   }
-
-  // Initiate VNPay payment
-  Future<String> initiateVnpayPayment() async {
-    final response = await http.post(
-      Uri.parse('http://localhost:3002/api/payment/create-payment'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'amount': getCartTotal(),
-        'orderId': 'ORDER${DateTime.now().millisecondsSinceEpoch}',
-        'orderDescription':
-            'Payment for order #${DateTime.now().millisecondsSinceEpoch}',
-        'bankCode': 'NCB',
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['paymentUrl'];
-    } else {
-      throw Exception(
-        'Failed to initiate VNPay payment: ${response.statusCode}',
-      );
-    }
-  }
-}
-
-class CartItem {
-  final Product product;
-  final int quantity;
-
-  CartItem({required this.product, required this.quantity});
 }
