@@ -49,7 +49,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
       // Gọi API để lấy danh sách đơn hàng
       final response = await _apiService.getRequest(
-        '/order/customer/$customerId',
+        '/order?customerId=$customerId',
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -125,7 +125,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 SizedBox(height: 4),
                 Text('Trạng thái: ${order['status']}'),
                 Text('Tổng tiền: ${totalPrice.toStringAsFixed(0)} ₫'),
-                Text('Ngày đặt: ${order['createdAt'].substring(0, 10)}'),
+                // Text('Ngày đặt: ${order['createdAt'].substring(0, 10)}'),
               ],
             ),
             trailing: Icon(
