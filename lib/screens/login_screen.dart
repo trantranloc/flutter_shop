@@ -25,38 +25,49 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // Kiểm tra định dạng email
-  String? _validateEmail(String email) {
-    if (email.isEmpty) {
-      return "Email không được để trống!";
-    }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(email)) {
-      return "Email không đúng định dạng!";
-    }
-    return null;
+// Validate email format
+String? _validateEmail(String email) {
+  if (email.isEmpty) {
+    return "Email cannot be empty!";
   }
-
-  // Kiểm tra yêu cầu mật khẩu
-  String? _validatePassword(String password) {
-    if (password.isEmpty) {
-      return "Mật khẩu không được để trống!";
-    }
-    if (password.length < 8) {
-      return "Mật khẩu phải có ít nhất 8 ký tự!";
-    }
-    if (!password.contains(RegExp(r'[A-Z]'))) {
-      return "Mật khẩu phải có ít nhất 1 chữ cái in hoa!";
-    }
-    if (!password.contains(RegExp(r'[0-9]'))) {
-      return "Mật khẩu phải có ít nhất 1 số!";
-    }
-    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-      return "Mật khẩu phải có ít nhất 1 ký tự đặc biệt!";
-    }
-    return null;
+  if (email.length > 254) {
+    return "Email is too long!";
   }
+  if (email.contains(RegExp(r'\s'))) {
+    return "Email cannot contain whitespace!";
+  }
+  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  if (!emailRegex.hasMatch(email)) {
+    return "Invalid email format!";
+  }
+  return null;
+}
 
+// Validate password requirements
+String? _validatePassword(String password) {
+  if (password.isEmpty) {
+    return "Password cannot be empty!";
+  }
+  if (password.length < 8) {
+    return "Password must be at least 8 characters long!";
+  }
+  if (password.length > 128) {
+    return "Password is too long!";
+  }
+  if (password.contains(RegExp(r'\s'))) {
+    return "Password cannot contain whitespace!";
+  }
+  if (!password.contains(RegExp(r'[A-Z]'))) {
+    return "Password must contain at least one uppercase letter!";
+  }
+  if (!password.contains(RegExp(r'[0-9]'))) {
+    return "Password must contain at least one number!";
+  }
+  if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+    return "Password must contain at least one special character!";
+  }
+  return null;
+}
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
