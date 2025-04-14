@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.pink[50], // 🌸 Màu nền hồng nhẹ
       appBar: AppBar(
         title: Text(
-          "LIRIS'FELORA",
+          "LIRIS'FLORA",
           style: TextStyle(
             fontFamily: 'CrimsonText-Italic', // Font chữ có chân
             fontWeight: FontWeight.w200, // Chữ mỏng
@@ -71,6 +71,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Visibility(
+                      visible: false,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/logout');
+                        },
+                        child: const Text('Profile'),
+                      ),
+                    ),
                     HomeBanner(),
                     SizedBox(height: 20),
                     _buildProductCarousel(),
@@ -82,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.pink, // 🌸 Màu chữ
+                          color: Colors.pink,
                         ),
                       ),
                     ),
