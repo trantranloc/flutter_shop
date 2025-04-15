@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final GoRouter _router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/login',
     routes: [
       // Route chính với ShellRoute để giữ lại BottomNavigationBar
       ShellRoute(
