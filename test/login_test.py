@@ -111,7 +111,7 @@ class TestLoginAppium(unittest.TestCase):
         # Kiểm tra thiết bị Android
         try:
             devices = subprocess.check_output("adb devices", shell=True).decode()
-            if "emulator-5554" not in devices:
+            if "192.168.154.101:5555" not in devices:
                 raise Exception("Emulator-5554 not found. Please start the emulator.")
         except subprocess.CalledProcessError:
             raise Exception("Error running adb. Ensure Android SDK is installed and adb is in PATH.")
@@ -120,7 +120,7 @@ class TestLoginAppium(unittest.TestCase):
         options = UiAutomator2Options()
         options.platform_name = "Android"
         options.device_name = "MyAndroidDevice"
-        options.udid = "emulator-5554"
+        options.udid = "192.168.154.101:5555"
         options.app_package = "com.example.flutter_shop"
         options.app_activity = "com.example.flutter_shop.MainActivity"
         options.automation_name = "UiAutomator2"
@@ -171,7 +171,7 @@ class TestLoginAppium(unittest.TestCase):
             pass_field.send_keys(password)
 
             login_button = self.wait.until(EC.element_to_be_clickable(
-                (AppiumBy.XPATH, "(//android.widget.Button)[1]")
+                (AppiumBy.XPATH, "//android.widget.Button[@content-desc='Login']")
             ))
             login_button.click()
             print("🖱️ Clicked Login button!")
