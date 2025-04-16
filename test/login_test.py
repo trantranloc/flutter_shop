@@ -1,14 +1,13 @@
-import unittest
 import os
+import time
+import unittest
+from openpyxl import Workbook, load_workbook
 from appium import webdriver
-from appium.webdriver.common.appiumby import AppiumBy
 from appium.options.android import UiAutomator2Options
+from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from openpyxl import Workbook, load_workbook
-import time
-import concurrent.futures
+from selenium.common.exceptions import TimeoutException
 
 # Test data
 TEST_DATA = {
@@ -73,10 +72,16 @@ TEST_DATA = {
         "expected": "error:Password is too long!"
     },
     "TC_LOGIN_11": {
+        "description": "Verify login with email starting with a number",
+        "email": "123user@example.com",
+        "password": "Pass@123",
+        "expected": "error:Email cannot start with a number!"
+    },
+    "TC_LOGIN_12": {
         "description": "Verify login with valid username and password",
         "email": "user@example.com",
         "password": "Pass@123",
-        "expected": "home_screen"
+        "expected": "Success",
     },
 }
 
@@ -89,18 +94,34 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Nếu file không tồn tại -> tạo mới
-if not os.path.exists(file_path):
+is_new_file = not os.path.exists(file_path)
+if is_new_file:
     wb = Workbook()
     ws = wb.active
-    ws.append(["Test Case", "Description", "Result", "Status", "Note", "Duration (ms)"])
+    ws.append(["Test Case", "Description", "Username", "Password", "Expected Result"])
     wb.save(file_path)
+    print("🆕 File mới đã được tạo, bắt đầu từ Test 1")
 
 class TestLoginAppium(unittest.TestCase):
-    results = []  # Biến lưu kết quả test toàn cục trong lớp
+    results = {}  # Store results for the current test run
 
     @classmethod
     def setUpClass(cls):
-        pass
+        wb = load_workbook(file_path)
+        ws = wb.active
+        headers = [cell.value for cell in ws[1]]
+        
+        # Đếm đúng số cột Test
+        test_columns = [h for h in headers if h and str(h).strip().startswith("Test ")]
+        # Nếu là file mới, bắt đầu từ Test 1, nếu không thì tăng số test
+        cls.test_run_number = 1 if is_new_file else len(test_columns)
+        cls.test_column_name = f"Test {cls.test_run_number}"
+
+        if cls.test_column_name not in headers:
+            ws.cell(row=1, column=len(headers) + 1).value = cls.test_column_name
+            wb.save(file_path)
+
+        print(f"🚀 Starting test run: {cls.test_column_name}")
 
     def setUp(self):
         options = UiAutomator2Options()
@@ -125,10 +146,21 @@ class TestLoginAppium(unittest.TestCase):
     def tearDownClass(cls):
         wb = load_workbook(file_path)
         ws = wb.active
-        for result in cls.results:
-            ws.append(result)
+        headers = [cell.value for cell in ws[1]]
+        test_column_index = headers.index(cls.test_column_name) + 1
+
+        # Initialize rows if empty
+        if ws.max_row == 1:
+            for test_id in TEST_DATA:
+                data = TEST_DATA[test_id]
+                ws.append([test_id, data["description"], data["email"], data["password"], data["expected"]])
+
+        # Update test results for the current run
+        for row_idx, test_id in enumerate(TEST_DATA, start=2):
+            ws.cell(row=row_idx, column=test_column_index).value = cls.results.get(test_id, "Fail")
+        
         wb.save(file_path)
-        print(f"📝 Results saved to {file_path}")
+        print(f"📝 Results saved to {file_path} for {cls.test_column_name}")
 
     def login(self, email, password):
         try:
@@ -147,7 +179,6 @@ class TestLoginAppium(unittest.TestCase):
             login_button = self.wait.until(EC.element_to_be_clickable(
                 (AppiumBy.XPATH, "(//android.widget.Button)[1]")))
             login_button.click()
-            return None
         except TimeoutException as e:
             return f"Error: Element not found - {str(e)}"
         except Exception as e:
@@ -164,67 +195,41 @@ class TestLoginAppium(unittest.TestCase):
     def run_test(self, test_id):
         start_time = time.time()
         data = TEST_DATA[test_id]
-        print(f"\n📋 Running test {test_id}: {data['description']}")
+        print(f"\n📋 Running test {test_id}: {data['description']} ({self.test_column_name})")
 
         error = self.login(data["email"], data["password"])
         expected = data["expected"]
 
-        if expected == "home_screen":
+        if expected == "Success":
             if error is None and self.is_home_screen():
-                result = True
                 status = "Pass"
                 note = "Successfully logged in and redirected to home screen"
-                print(note)
-                print(result,status)
             else:
-                result = False
                 status = "Fail"
                 note = error if error else "Failed to reach home screen"
-                print(note)
-                print(result,status)
         else:
-            if not self.is_home_screen():
-                result = False
-                status = "Fail"
-                note = f"Login không thành công như dự kiến với {data['email']}/{data['password']}"
-                print(note)
-                print(result,status)
-            else:
-                result = True
+            if error and error == expected:
                 status = "Pass"
-                note = "Đăng nhập sai nhưng vẫn vào được home screen"
-                print(note)
-                print(result,status)
+                note = f"Expected error message received: {error}"
+            else:
+                status = "Fail"
+                note = f"Expected error '{expected}' but got '{error}'"
 
-        end_time = time.time()
-        duration_ms = int((end_time - start_time) * 1000)
+        print(f"Status: {status}")
+        self.results[test_id] = status
+        # if status == "Fail":
+        #     self.fail(note)
 
-        result_row = [test_id, data["description"], result, status, note, duration_ms]
-        TestLoginAppium.results.append(result_row)
-        return result_row
+# Dynamically create test methods
+def create_test_method(test_id):
+    def test_method(self):
+        self.run_test(test_id)
+    test_method.__name__ = f"test_{test_id}"
+    return test_method
 
-    def test_TC_LOGIN_01(self):
-        self.run_test("TC_LOGIN_01")
-    def test_TC_LOGIN_02(self):
-        self.run_test("TC_LOGIN_02")
-    def test_TC_LOGIN_03(self):
-        self.run_test("TC_LOGIN_03")
-    def test_TC_LOGIN_04(self):
-        self.run_test("TC_LOGIN_04")
-    def test_TC_LOGIN_05(self):
-        self.run_test("TC_LOGIN_05")
-    def test_TC_LOGIN_06(self):
-        self.run_test("TC_LOGIN_06")
-    def test_TC_LOGIN_07(self):
-        self.run_test("TC_LOGIN_07")
-    def test_TC_LOGIN_08(self):
-        self.run_test("TC_LOGIN_08")
-    def test_TC_LOGIN_09(self):
-        self.run_test("TC_LOGIN_09")
-    def test_TC_LOGIN_10(self):
-        self.run_test("TC_LOGIN_10")
-    def test_TC_LOGIN_11(self):
-        self.run_test("TC_LOGIN_11")
+# Add test methods to the class
+for test_id in TEST_DATA:
+    setattr(TestLoginAppium, f"test_{test_id}", create_test_method(test_id))
 
 if __name__ == "__main__":
     unittest.main()
