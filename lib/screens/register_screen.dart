@@ -58,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (password.length < 8 ||
         !RegExp(r'^(?=.*[A-Z])(?=.*\d).+$').hasMatch(password)) {
       setState(() {
-        _passwordError = "Mật khẩu ít nhất 6 ký tự, chứa 1 số và 1 chữ in hoa!";
+        _passwordError = "Mật khẩu ít nhất 8 ký tự, chứa 1 số và 1 chữ in hoa!";
       });
       return;
     }

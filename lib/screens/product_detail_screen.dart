@@ -125,6 +125,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         '${widget.product.name} đã được thêm vào giỏ hàng!',
                       ),
                       backgroundColor: Colors.green,
+                      duration: Duration(seconds: 1),
                     ),
                   );
                 },

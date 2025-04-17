@@ -58,7 +58,7 @@ TEST_DATA = {
         "email": "test@example.com",
         "password": "Pass@12",
         "confirm_password": "Pass@12",
-        "expected": "error:Mật khẩu ít nhất 6 ký tự, chứa 1 số và 1 chữ in hoa!"
+        "expected": "error:Mật khẩu ít nhất 8  ký tự, chứa 1 số và 1 chữ in hoa!"
     },
     "TC_REGISTER_07": {
         "description": "Verify register with password missing uppercase letter",
@@ -66,7 +66,7 @@ TEST_DATA = {
         "email": "test@example.com",
         "password": "pass@123",
         "confirm_password": "pass@123",
-        "expected": "error:Mật khẩu ít nhất 6 ký tự, chứa 1 số và 1 chữ in hoa!"
+        "expected": "error:Mật khẩu ít nhất 8 ký tự, chứa 1 số và 1 chữ in hoa!"
     },
     "TC_REGISTER_08": {
         "description": "Verify register with password missing number",
@@ -74,7 +74,7 @@ TEST_DATA = {
         "email": "test@example.com",
         "password": "Pass@abc",
         "confirm_password": "Pass@abc",
-        "expected": "error:Mật khẩu ít nhất 6 ký tự, chứa 1 số và 1 chữ in hoa!"
+        "expected": "error:Mật khẩu ít nhất 8 ký tự, chứa 1 số và 1 chữ in hoa!"
     },
     "TC_REGISTER_09": {
         "description": "Verify register with mismatched passwords",
@@ -102,10 +102,10 @@ TEST_DATA = {
     },
     "TC_REGISTER_12": {
         "description": "Verify register with valid data and successful navigation to login screen",
-        "username": "New User",
-        "email": "tranvansang123@gmail.com",
-        "password": "Tranvansang123@",
-        "confirm_password": "Tranvansang123@",
+        "username": "Levantuan",
+        "email": "levantuan123@gmail.com",
+        "password": "Levantuan123@",
+        "confirm_password": "Levantuan123@",
         "expected": "login_screen"
     }
 }
@@ -135,7 +135,7 @@ class TestRegisterAppium(unittest.TestCase):
         # Kiểm tra thiết bị Android
         try:
             devices = subprocess.check_output("adb devices", shell=True).decode()
-            if "192.168.154.101:5555" not in devices:
+            if "b9fff218" not in devices:
                 raise Exception("Emulator-5554 not found. Please start the emulator.")
         except subprocess.CalledProcessError:
             raise Exception("Error running adb. Ensure Android SDK is installed and adb is in PATH.")
@@ -144,7 +144,7 @@ class TestRegisterAppium(unittest.TestCase):
         options = UiAutomator2Options()
         options.platform_name = "Android"
         options.device_name = "MyAndroidDevice"
-        options.udid = "192.168.154.101:5555"
+        options.udid = "b9fff218"
         options.app_package = "com.example.flutter_shop"
         options.app_activity = "com.example.flutter_shop.MainActivity"
         options.automation_name = "UiAutomator2"

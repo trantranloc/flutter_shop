@@ -25,49 +25,57 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-// Validate email format
-String? _validateEmail(String email) {
-  if (email.isEmpty) {
-    return "Email cannot be empty!";
-  }
-  if (email.length > 254) {
-    return "Email is too long!";
-  }
-  if (email.contains(RegExp(r'\s'))) {
-    return "Email cannot contain whitespace!";
-  }
-  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-  if (!emailRegex.hasMatch(email)) {
-    return "Invalid email format!";
-  }
-  return null;
-}
+  // Validate email format
+  String? _validateEmail(String email) {
+    if (email.isEmpty) {
+      return "Email cannot be empty!";
+    }
+    if (email.length > 50) {
+      return "Email is too long!";
+    }
+    if (email.contains(RegExp(r'\s'))) {
+      return "Email cannot contain whitespace!";
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      return "Invalid email format!";
+    }
+    if (RegExp(r'^[0-9]').hasMatch(email)) {
+      return "Email cannot start with a number!";
+    }
+    if(email.length < 5) {
+      return "Email must be at least 5 characters long!";
+    }
 
-// Validate password requirements
-String? _validatePassword(String password) {
-  if (password.isEmpty) {
-    return "Password cannot be empty!";
+    return null;
   }
-  if (password.length < 8) {
-    return "Password must be at least 8 characters long!";
+
+  // Validate password requirements
+  String? _validatePassword(String password) {
+    if (password.isEmpty) {
+      return "Password cannot be empty!";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long!";
+    }
+    if (password.length > 128) {
+      return "Password is too long!";
+    }
+    if (password.contains(RegExp(r'\s'))) {
+      return "Password cannot contain whitespace!";
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return "Password must contain at least one uppercase letter!";
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return "Password must contain at least one number!";
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return "Password must contain at least one special character!";
+    }
+    return null;
   }
-  if (password.length > 128) {
-    return "Password is too long!";
-  }
-  if (password.contains(RegExp(r'\s'))) {
-    return "Password cannot contain whitespace!";
-  }
-  if (!password.contains(RegExp(r'[A-Z]'))) {
-    return "Password must contain at least one uppercase letter!";
-  }
-  if (!password.contains(RegExp(r'[0-9]'))) {
-    return "Password must contain at least one number!";
-  }
-  if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-    return "Password must contain at least one special character!";
-  }
-  return null;
-}
+
   Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
