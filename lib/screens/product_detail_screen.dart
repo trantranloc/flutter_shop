@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/product.dart';
+import '../services/cart_service.dart'; // Import CartService
 import '../widgets/product_card.dart'; // Import ProductCard widget
 
 class ProductDetailScreen extends StatefulWidget {
   final Product product;
-  final List<Product> allProducts; // Danh sách tất cả sản phẩm
+  final List<Product> allProducts; // List of all products
 
   const ProductDetailScreen({
     super.key,
@@ -18,10 +20,51 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _quantity = 1;
+  bool _isFavorite = false; // Track favorite state
+  final _cartService = CartService(); // Initialize CartService
+
+  void _addToCart(BuildContext context) async {
+    try {
+      // Add the product to cart with selected quantity
+      _cartService.addToCart(widget.product, _quantity);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${widget.product.name} added to cart successfully!'),
+          duration: const Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'View Cart',
+            textColor: Colors.white,
+            onPressed: () {
+              GoRouter.of(context).go('/cart');
+            },
+          ),
+          backgroundColor: Colors.pink.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } catch (e) {
+      // Show error message if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add to cart: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Lọc danh sách sản phẩm liên quan (cùng category nhưng không phải chính nó)
+    // Filter related products (same category, excluding current product)
     List<Product> relatedProducts =
         widget.allProducts
             .where(
@@ -33,133 +76,243 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product.name),
-        backgroundColor: Colors.pink[300],
+        title: Text(
+          widget.product.name,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.pink.shade300, Colors.pink.shade100],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                _isFavorite = !_isFavorite;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    _isFavorite
+                        ? '${widget.product.name} added to favorites!'
+                        : '${widget.product.name} removed from favorites!',
+                  ),
+                  backgroundColor: _isFavorite ? Colors.pink : Colors.grey,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
+            },
+            tooltip: 'Favorite',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ảnh sản phẩm
+            // Product Image
             Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  widget.product.images.isNotEmpty
-                      ? widget.product.images.first
-                      : 'https://via.placeholder.com/150',
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 100,
-                        color: Colors.grey,
-                      ),
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.network(
+                    widget.product.images.isNotEmpty
+                        ? widget.product.images.first
+                        : 'https://via.placeholder.com/300',
+                    width: double.infinity,
+                    height: 300,
+                    fit: BoxFit.cover,
+                    errorBuilder:
+                        (context, error, stackTrace) => Container(
+                          width: double.infinity,
+                          height: 300,
+                          color: Colors.pink.shade100,
+                          child: Icon(
+                            Icons.local_florist,
+                            size: 100,
+                            color: Colors.pink.shade300,
+                          ),
+                        ),
+                  ),
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-            // Tên sản phẩm
+            // Product Name
             Text(
               widget.product.name,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-            // Giá sản phẩm
+            // Product Price
             Text(
-              '\$${widget.product.price}',
+              '\$${widget.product.price.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.green[700],
+                color: Colors.pink.shade600,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 12),
 
-            // Mô tả sản phẩm
+            // Product Description
             Text(
               widget.product.description,
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade700,
+                height: 1.5,
+              ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-            // Chọn số lượng sản phẩm
+            // Quantity Selector
             Row(
               children: [
-                Text(
-                  "Quantity:",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                const Text(
+                  'Quantity:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
-                IconButton(
-                  onPressed:
-                      () => setState(
-                        () => _quantity = (_quantity > 1) ? _quantity - 1 : 1,
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.grey.shade100,
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed:
+                            () => setState(() {
+                              _quantity = _quantity > 1 ? _quantity - 1 : 1;
+                            }),
+                        icon: const Icon(Icons.remove, color: Colors.pink),
+                        padding: const EdgeInsets.all(4),
                       ),
-                  icon: Icon(Icons.remove_circle, color: Colors.red),
-                ),
-                Text(
-                  '$_quantity',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  onPressed: () => setState(() => _quantity++),
-                  icon: Icon(Icons.add_circle, color: Colors.green),
+                      SizedBox(
+                        width: 40,
+                        child: Center(
+                          child: Text(
+                            '$_quantity',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => setState(() => _quantity++),
+                        icon: const Icon(Icons.add, color: Colors.pink),
+                        padding: const EdgeInsets.all(4),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Nút "Thêm vào giỏ hàng"
+            // Add to Cart Button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '${widget.product.name} đã được thêm vào giỏ hàng!',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-                icon: Icon(Icons.shopping_cart),
-                label: Text("Thêm vào giỏ hàng"),
+              child: ElevatedButton(
+                onPressed: () => _addToCart(context),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Colors.green,
-                  textStyle: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.pink.shade300, Colors.pink.shade100],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Text(
+                      'Add to Cart',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 24),
 
-            // Hiển thị danh sách sản phẩm liên quan
-            Text(
-              "Related Products ",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // Related Products
+            Row(
+              children: [
+                Icon(
+                  Icons.local_florist,
+                  color: Colors.pink.shade400,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Related Products',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.pink,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 16),
 
             relatedProducts.isNotEmpty
                 ? GridView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
                     childAspectRatio: 0.7,
                   ),
                   itemCount: relatedProducts.length,
@@ -185,7 +338,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     );
                   },
                 )
-                : Text(""),
+                : Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.local_florist,
+                        size: 60,
+                        color: Colors.pink.shade200,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No related products found',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
           ],
         ),
       ),

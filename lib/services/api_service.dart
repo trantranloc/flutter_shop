@@ -37,20 +37,20 @@ class ApiService {
       Map<String, dynamic> finalHeaders = headers ?? {};
 
       // Debug
-      print("Final headers for GET request: $finalHeaders");
-      print("Full URL: ${_dio.options.baseUrl}$endpoint");
+      // print("Final headers for GET request: $finalHeaders");
+      // print("Full URL: ${_dio.options.baseUrl}$endpoint");
 
       Options options = Options(headers: finalHeaders);
 
       return await _dio.get(endpoint, options: options);
     } catch (e) {
-      print("GET Error: $e");
+      // print("GET Error: $e");
       if (e is DioException) {
-        print("Status code: ${e.response?.statusCode}");
-        print("Response data: ${e.response?.data}");
-        print("Request data: ${e.requestOptions.data}");
-        print("Request headers: ${e.requestOptions.headers}");
-        print("Request path: ${e.requestOptions.path}");
+        // print("Status code: ${e.response?.statusCode}");
+        // print("Response data: ${e.response?.data}");
+        // print("Request data: ${e.requestOptions.data}");
+        // print("Request headers: ${e.requestOptions.headers}");
+        // print("Request path: ${e.requestOptions.path}");
       }
       rethrow;
     }

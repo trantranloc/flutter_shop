@@ -106,10 +106,10 @@ class ProductCard extends StatelessWidget {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${product.name} đã được thêm vào giỏ hàng'),
+          content: Text('${product.name} add to cart successfully!'),
           duration: Duration(seconds: 2),
           action: SnackBarAction(
-            label: 'XEM GIỎ',
+            label: 'View Cart',
             textColor: Colors.white,
             onPressed: () {
               Navigator.of(context).pushNamed('/cart');
@@ -122,7 +122,7 @@ class ProductCard extends StatelessWidget {
       // Show error message if something goes wrong
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Không thể thêm vào giỏ hàng: $e'),
+          content: Text('Not add to cart: $e'),
           backgroundColor: Colors.red,
         ),
       );
