@@ -11,73 +11,73 @@ from selenium.common.exceptions import TimeoutException
 
 # Test data
 TEST_DATA = {
-    "TC_LOGIN_01": {
+    "TC01": {
         "description": "Verify login with a non-existent username",
         "email": "wronguser@example.com",
         "password": "Pass@123",
         "expected": "error:Invalid username or password"
     },
-    "TC_LOGIN_02": {
+    "TC02": {
         "description": "Verify login with a password missing an uppercase letter",
         "email": "user@example.com",
         "password": "pass@123",
         "expected": "error:Password must contain at least one uppercase letter!"
     },
-    "TC_LOGIN_03": {
+    "TC03": {
         "description": "Verify login with a password missing a special character",
         "email": "user@example.com",
         "password": "Pass123",
         "expected": "error:Password must contain at least one special character!"
     },
-    "TC_LOGIN_04": {
+    "TC04": {
         "description": "Verify login with a password missing a number",
         "email": "user@example.com",
         "password": "Pass@abc",
         "expected": "error:Password must contain at least one number!"
     },
-    "TC_LOGIN_05": {
+    "TC05": {
         "description": "Verify login with an empty username field",
         "email": "",
         "password": "Pass@123",
         "expected": "error:Email cannot be empty!"
     },
-    "TC_LOGIN_06": {
+    "TC06": {
         "description": "Verify login with an empty password field",
         "email": "user@example.com",
         "password": "",
         "expected": "error:Password cannot be empty!"
     },
-    "TC_LOGIN_07": {
+    "TC07": {
         "description": "Verify login with both username and password fields empty",
         "email": "",
         "password": "",
         "expected": "error:Email cannot be empty!"
     },
-    "TC_LOGIN_08": {
+    "TC08": {
         "description": "Verify login with special characters in the username",
         "email": "user@#$%@example.com",
         "password": "Pass@123",
         "expected": "error:Invalid email format!"
     },
-    "TC_LOGIN_09": {
+    "TC09": {
         "description": "Verify login with a username exceeding the maximum length",
         "email": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz@example.com",
         "password": "Pass@123",
         "expected": "error:Email is too long!"
     },
-    "TC_LOGIN_10": {
+    "TC10": {
         "description": "Verify login with a password exceeding the maximum length",
         "email": "user@example.com",
         "password": "Pass@123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789",
         "expected": "error:Password is too long!"
     },
-    "TC_LOGIN_11": {
+    "TC11": {
         "description": "Verify login with email starting with a number",
         "email": "123user@example.com",
         "password": "Pass@123",
         "expected": "error:Email cannot start with a number!"
     },
-    "TC_LOGIN_12": {
+    "TC12": {
         "description": "Verify login with valid username and password",
         "email": "user@example.com",
         "password": "Pass@123",
